@@ -8,6 +8,9 @@
 namespace pamsi {
 
 class Board_t : public sf::Drawable {
+#define fillColor_1 sf::Color::Red
+#define fillColor_2 sf::Color::White
+#define outlineColor sf::Color::Black
     std::vector<std::vector<pamsi::Tile_t>> tiles;
 
 public:

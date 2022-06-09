@@ -18,15 +18,13 @@ Board_t::Board_t(float windowsSize, float borderWidth)
 
             pamsi::Tile_t temp(sf::Vector2f(tileLength, tileLength));
 
-            if(!(x % 2) && y % 2)
-                temp.SetColor(sf::Color::Red);
-            else if(x % 2 && !(y % 2))
-                temp.SetColor(sf::Color::Red);
+            if(x % 2 != y % 2)
+                temp.SetColor(fillColor_1);
             else
-                temp.SetColor(sf::Color::White);
+                temp.SetColor(fillColor_2);
 
             temp.SetBorderWidth(borderWidth);
-            temp.SetOutlineColor(sf::Color::Black);
+            temp.SetOutlineColor(outlineColor);
             temp.SetPosition(sf::Vector2f(x, y));
 
             tempVector.emplace_back(temp);
