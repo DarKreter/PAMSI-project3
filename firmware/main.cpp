@@ -1,3 +1,4 @@
+#include "board.hpp"
 #include "tile.hpp"
 #include <SFML/Graphics.hpp>
 #include <chrono>
@@ -7,6 +8,7 @@
 using namespace std;
 
 constexpr size_t windowsSize = 1000;
+constexpr size_t borderWidth = 5.f;
 
 int main()
 {
@@ -30,8 +32,10 @@ int main()
     // text.setFillColor(sf::Color(0xff5f51ff));
     // text.setStyle(sf::Text::Bold);
 
-    // window.setVerticalSyncEnabled(true);
+    pamsi::Board_t plansza(windowsSize, borderWidth);
+
     window.setFramerateLimit(60);
+    
     // run the program as long as the window is open
     while(window.isOpen()) {
         // check all the window's events that were triggered since the last
@@ -58,36 +62,6 @@ int main()
         whitePawn.setSmooth(true);
         blackPawn.setSmooth(true);
 
-        // float tileLength = (windowsSize / 8.f);
-        // float borderWidth = 5.f;
-
-        pamsi::Tile_t test(sf::Vector2f(100, 100));
-        test.SetColor(sf::Color::Red);
-        test.SetBorderWidth(10);
-        test.SetOutlineColor(sf::Color::Black);
-        test.SetPosition(sf::Vector2f(100, 100));
-        window.draw(test);
-
-        // for(size_t x = 0; x < windowsSize; x += tileLength) {
-        //     for(size_t y = 0; y < windowsSize; y += tileLength) {
-        //         sf::RectangleShape tile(sf::Vector2f(tileLength,
-        //         tileLength));
-
-        //         if(!(x % 2) && y % 2)
-        //             tile.setFillColor(sf::Color(255, 0, 0));
-        //         else if(x % 2 && !(y % 2))
-        //             tile.setFillColor(sf::Color(255, 0, 0));
-        //         else
-        //             tile.setFillColor(sf::Color(255, 255, 255));
-
-        //         tile.setOutlineThickness(-borderWidth / 2.f);
-        //         tile.setOutlineColor(sf::Color(0, 0, 0));
-
-        //         tile.setPosition(x, y);
-        //         window.draw(tile);
-        //     }
-        // }
-
         // for(size_t x = 0; x < windowsSize; x += tileLength) {
         //     for(size_t y = 0; y < windowsSize; y += tileLength) {
         //         sf::CircleShape shape((tileLength - borderWidth) / 2.f);
@@ -112,6 +86,7 @@ int main()
         //     }
         // }
 
+        window.draw(plansza);
         // end the current frame
         window.display();
     }

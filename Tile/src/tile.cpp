@@ -25,8 +25,6 @@ void Tile_t::draw(sf::RenderTarget& target, sf::RenderStates states) const
     // apply the texture
     // states.texture = &_texture;
 
-    // you may also override states.shader or states.blendMode if you want
-
     // draw the vertex array
     target.draw(_shape, states);
 }
