@@ -1,10 +1,8 @@
-add_executable(firmware main.cpp)
-target_include_directories(firmware PUBLIC .)
+add_executable(firmware src/main.cpp src/game.cpp)
+target_include_directories(firmware PUBLIC . inc src)
 
-target_link_libraries(firmware PUBLIC sfml-graphics)
-target_link_libraries(firmware PUBLIC tile)
-target_link_libraries(firmware PUBLIC board)
+set(DEPENDENCIES_LIST sfml-graphics tile figure pawn board)
 
-add_dependencies(firmware sfml-graphics)
-add_dependencies(firmware tile)
-add_dependencies(firmware board)
+target_link_libraries(firmware PUBLIC ${DEPENDENCIES_LIST})
+
+add_dependencies(firmware ${DEPENDENCIES_LIST})
