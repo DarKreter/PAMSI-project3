@@ -1,7 +1,7 @@
 #include "game.hpp"
 
 namespace pamsi {
-void Game([[maybe_unused]] pamsi::Board_t* board)
+void Game([[maybe_unused]] pamsi::Board_t& board)
 {
     while(1)
         ;
@@ -10,34 +10,30 @@ void Game([[maybe_unused]] pamsi::Board_t* board)
 constexpr size_t windowsSize = 1000;
 constexpr size_t borderWidth = 5.f;
 
-void sfmlLoop()
+void sfmlLoop(pamsi::Board_t& board)
 {
-    sf::VideoMode();
-    sf::RenderWindow* window =
-        new sf::RenderWindow(sf::VideoMode(windowsSize, windowsSize),
-                             "Checkers!", sf::Style::Default);
+    sf::RenderWindow window(sf::VideoMode(windowsSize, windowsSize),
+                            "Checkers!", sf::Style::Default);
 
-    pamsi::Board_t* board = new pamsi::Board_t(windowsSize, borderWidth);
-
-    window->setFramerateLimit(60);
+    window.setFramerateLimit(60);
 
     // run the program as long as the window is open
-    while(window->isOpen()) {
+    while(window.isOpen()) {
         // check all the window's events that were triggered since the last
         // iteration of the loop
         sf::Event event;
-        while(window->pollEvent(event)) {
+        while(window.pollEvent(event)) {
             // "close requested" event: we close the window
             if(event.type == sf::Event::Closed)
-                window->close();
+                window.close();
         }
 
         // clear the window with black color
-        window->clear(sf::Color::White);
+        window.clear(sf::Color::White);
 
-        window->draw(*board);
+        window.draw(board);
         // end the current frame
-        window->display();
+        window.display();
     }
 }
 

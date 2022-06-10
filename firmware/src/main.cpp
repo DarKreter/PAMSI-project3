@@ -11,10 +11,6 @@ constexpr size_t borderWidth = 5.f;
 
 int main()
 {
-    // sf::VideoMode();
-    // sf::RenderWindow window(sf::VideoMode(windowsSize, windowsSize),
-    //                         "Checkers!", sf::Style::Default);
-
     // sf::Font font;
     // if(!font.loadFromFile("FontAlexa3.ttf")) {
     //     return 0;
@@ -28,9 +24,9 @@ int main()
     // text.setFillColor(sf::Color(0xff5f51ff));
     // text.setStyle(sf::Text::Bold);
 
-    // pamsi::Board_t board(windowsSize, borderWidth);
+    pamsi::Board_t board(windowsSize, borderWidth);
 
-    std::thread sfmlLoop(pamsi::sfmlLoop);
+    std::thread sfmlLoop(pamsi::sfmlLoop, std::ref(board));
     // std::thread realGame(pamsi::Game, &board);
 
     sfmlLoop.join();
