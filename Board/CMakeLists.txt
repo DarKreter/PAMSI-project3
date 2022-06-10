@@ -1,13 +1,10 @@
 set(HEADER_LIST inc/Board.hpp)
 set(SRC_LIST src/Board.cpp)
-
+set(DEPENDENCIES_LIST sfml-graphics tile figure pawn)
 
 add_library(board ${SRC_LIST} ${HEADER_LIST})
 
 target_include_directories(board PUBLIC . inc src)
 
-target_link_libraries(board PUBLIC sfml-graphics)
-target_link_libraries(board PUBLIC tile)
-
-add_dependencies(board sfml-graphics)
-add_dependencies(board tile)
+target_link_libraries(board PUBLIC ${DEPENDENCIES_LIST})
+add_dependencies(board ${DEPENDENCIES_LIST})
