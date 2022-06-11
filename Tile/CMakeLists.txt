@@ -1,8 +1,8 @@
 set(HEADER_LIST inc/Tile.hpp)
 set(SRC_LIST src/Tile.cpp)
-set(DEPENDENCIES_LIST sfml-graphics)
+set(DEPENDENCIES_LIST sfml-graphics figure)
 
-add_library(tile ${SRC_LIST} ${HEADER_LIST})
+add_library(tile STATIC ${SRC_LIST} ${HEADER_LIST})
 
 target_include_directories(tile PUBLIC . inc src)
 

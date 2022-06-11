@@ -2,7 +2,7 @@ set(HEADER_LIST inc/Figure.hpp)
 set(SRC_LIST src/Figure.cpp)
 set(DEPENDENCIES_LIST sfml-graphics)
 
-add_library(figure ${SRC_LIST} ${HEADER_LIST})
+add_library(figure STATIC ${SRC_LIST} ${HEADER_LIST})
 
 target_include_directories(figure PUBLIC . inc src)
 
