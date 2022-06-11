@@ -1,22 +1,27 @@
 #include "pawn.hpp"
+#include "board.hpp"
 #include <initializer_list>
 #include <iostream>
 
 namespace pamsi {
 
-std::list<sf::Vector2u> Pawn_t::GetPossibleMoves()
+std::vector<sf::Vector2i> Pawn_t::GetPossibleMoves()
 {
-    std::cout << _coord.x << " " << _coord.y << ":" << std::endl;
+    auto options = {sf::Vector2i(-1, -1), sf::Vector2i(1, -1)};
 
-    auto options = {sf::Vector2u(-1, 1), sf::Vector2u(1, 1)};
+    std::vector<sf::Vector2i> moves;
 
     for(auto& option : options) {
-        // Check on the board if new position is empty
-        // Pointer to board is needed
-        // Also tile need to know if something is on him (pointer)
+        try {
+            if((*_myBoard)(_coord.x + option.x, _coord.y + option.y).GetFigure() == nullptr)
+                moves.emplace_back(sf::Vector2i(_coord.x + option.x, _coord.y + option.y));
+        }
+        catch(std::out_of_range& e) {
+            continue;
+        }
     }
 
-    return std::list<sf::Vector2u>();
+    return moves;
 }
 
 } // namespace pamsi

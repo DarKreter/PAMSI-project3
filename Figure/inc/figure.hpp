@@ -6,6 +6,8 @@
 
 namespace pamsi {
 
+class Board_t;
+
 enum class Team_e
 {
     white,
@@ -17,15 +19,18 @@ protected:
     sf::CircleShape _shape;
     sf::Vector2u _coord;
     Team_e _team;
+    pamsi::Board_t* _myBoard;
 
 public:
-    Figure_t(float radius) : _shape(radius){};
+    Figure_t(float radius) : _shape(radius), _myBoard{NULL} {};
 
     void SetTexture(sf::Texture& texture);
     void SetPosition(sf::Vector2f position);
     void SetCoordinates(sf::Vector2u coord);
     void SetTeam(Team_e team) { _team = team; }
-    virtual std::list<sf::Vector2u> GetPossibleMoves() = 0;
+    void SetBoard(pamsi::Board_t* board) { _myBoard = board; }
+    virtual std::vector<sf::Vector2i> GetPossibleMoves() = 0;
+    sf::Vector2u& GetCoordinates() { return _coord; }
 
 protected:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;

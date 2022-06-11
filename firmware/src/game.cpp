@@ -4,6 +4,7 @@
 namespace pamsi {
 void Game(pamsi::Board_t& board)
 {
+    // white always starts
     pamsi::Team_e whoseTurn = pamsi::Team_e::white;
     while(true) {
         // Check lose conditions
@@ -19,6 +20,8 @@ void Game(pamsi::Board_t& board)
         // Check Draw conditions (checking if there is any move that can be done
         // but return false with first occurrence)
         if(board.CheckDrawConditions(whoseTurn)) {
+            while(true)
+                ;
             std::cout << "DRAW!" << std::endl;
             std::cout << "GAME OVER!" << std::endl;
             exit(0);
@@ -43,8 +46,8 @@ constexpr size_t borderWidth = 5.f;
 
 void sfmlLoop(pamsi::Board_t& board)
 {
-    sf::RenderWindow window(sf::VideoMode(windowsSize, windowsSize),
-                            "Checkers!", sf::Style::Default);
+    sf::RenderWindow window(sf::VideoMode(windowsSize, windowsSize), "Checkers!",
+                            sf::Style::Default);
 
     window.setFramerateLimit(60);
 
@@ -66,6 +69,8 @@ void sfmlLoop(pamsi::Board_t& board)
         // end the current frame
         window.display();
     }
+
+    exit(0);
 }
 
 } // namespace pamsi
