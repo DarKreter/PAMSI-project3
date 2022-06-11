@@ -1,6 +1,6 @@
 set(HEADER_LIST inc/Board.hpp)
 set(SRC_LIST src/Board.cpp)
-set(DEPENDENCIES_LIST sfml-graphics tile pawn move)
+set(DEPENDENCIES_LIST sfml-graphics tile piece king move)
 
 add_library(board STATIC ${SRC_LIST} ${HEADER_LIST})
 

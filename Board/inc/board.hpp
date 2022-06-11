@@ -17,7 +17,7 @@ class Board_t : public sf::Drawable {
     std::vector<std::shared_ptr<Figure_t>> _whiteFigures;
     std::vector<std::shared_ptr<Figure_t>> _blackFigures;
 
-    sf::Texture _whitePawn, _blackPawn;
+    sf::Texture _whitePiece, _blackPiece, _whiteKing, _blackKing;
 
     float _borderWidth;
     float _tileLength;
@@ -28,10 +28,10 @@ class Board_t : public sf::Drawable {
     void SetUpTiles();
 
 public:
-
     Board_t(float windowsSize, float borderWidth);
     bool CheckLoseConditions(Team_e player);
     void MoveFigure(pamsi::Move_t move);
+    void ChangePieceToKing(std::shared_ptr<Figure_t> figure);
 
     float GetBorderWidth() { return _borderWidth; }
     float GetTileLength() { return _tileLength; }

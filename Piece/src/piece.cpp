@@ -1,10 +1,11 @@
-#include "pawn.hpp"
 #include "board.hpp"
+#include "piece.hpp"
 #include <iostream>
+
 
 namespace pamsi {
 
-std::vector<pamsi::Move_t> Pawn_t::GetNormalMoves()
+std::vector<pamsi::Move_t> Piece_t::GetNormalMoves()
 {
     // Get available direction for specified team
     std::vector<sf::Vector2i> options;
@@ -40,9 +41,9 @@ std::vector<pamsi::Move_t> Pawn_t::GetNormalMoves()
     return moves;
 }
 
-std::vector<pamsi::Move_t> Pawn_t::GetAttackMoves()
+std::vector<pamsi::Move_t> Piece_t::GetAttackMoves()
 {
-    // Get possible options for pawn to take someone
+    // Get possible options for piece to take someone
     std::vector<sf::Vector2i> options = {sf::Vector2i(-1, -1), sf::Vector2i(1, -1),
                                          sf::Vector2i(-1, 1), sf::Vector2i(1, 1)};
     std::vector<pamsi::Move_t> moves;

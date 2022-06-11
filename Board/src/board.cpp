@@ -1,5 +1,6 @@
 #include "board.hpp"
-#include "pawn.hpp"
+#include "king.hpp"
+#include "piece.hpp"
 #include <algorithm>
 #include <iostream>
 
@@ -21,6 +22,26 @@ void Board_t::draw(sf::RenderTarget& target, sf::RenderStates states) const
     // and all black figures
     for(auto& figure : _blackFigures)
         target.draw(*figure, states);
+}
+
+void Board_t::ChangePieceToKing(std::shared_ptr<Figure_t> figure)
+{
+    std::shared_ptr<Figure_t> temp = std::make_shared<King_t>(_figureRadius);
+    temp->SetBoard(this);
+    temp->SetCoordinates(figure->GetCoordinates());
+    temp->SetTeam(figure->GetTeam());
+    if(figure->GetTeam() == Team_e::white) {
+        temp->SetTexture(_whiteKing);
+        std::replace(std::begin(_whiteFigures), std::end(_whiteFigures), figure, temp);
+    }
+    else if(figure->GetTeam() == Team_e::black) {
+        temp->SetTexture(_blackKing);
+        std::replace(_blackFigures.begin(), _blackFigures.end(), figure, temp);
+    }
+
+    // Move it on tiles array
+    _tiles[figure->GetCoordinates().x][figure->GetCoordinates().y].SetFigure(nullptr);
+    _tiles[figure->GetCoordinates().x][figure->GetCoordinates().y].SetFigure(temp);
 }
 
 void Board_t::MoveFigure(pamsi::Move_t move)
@@ -92,14 +113,14 @@ void Board_t::SetUpFigures()
     for(size_t x = 0; x < 8; x++) {
         for(size_t y = 5; y < 8; y++) {
             if(x % 2 != y % 2) {
-                // Configure pawn
-                auto temp = std::make_shared<Pawn_t>(_figureRadius);
+                // Configure piece
+                auto temp = std::make_shared<Piece_t>(_figureRadius);
                 temp->SetBoard(this);
-                temp->SetTexture(_whitePawn);
+                temp->SetTexture(_whitePiece);
                 temp->SetCoordinates(sf::Vector2u(x, y));
                 temp->SetTeam(Team_e::white);
                 _whiteFigures.emplace_back(temp);
-                // add pawn into tile array
+                // add piece into tile array
                 _tiles[x][y].SetFigure(temp);
             }
         }
@@ -107,17 +128,26 @@ void Board_t::SetUpFigures()
 
     for(size_t x = 0; x < 8; x++) {
         for(size_t y = 0; y < 3; y++) {
-            auto temp = std::make_shared<Pawn_t>(_figureRadius);
+            auto temp = std::make_shared<Piece_t>(_figureRadius);
 
             if(x % 2 != y % 2) {
-                // configure pawn
+                if(x == 1 && y == 0)
+                    x = 1, y = 4;
+                if(x == 3 && y == 0)
+                    x = 3, y = 4;
+                // configure piece
                 temp->SetBoard(this);
-                temp->SetTexture(_blackPawn);
+                temp->SetTexture(_blackPiece);
                 temp->SetCoordinates(sf::Vector2u(x, y));
                 temp->SetTeam(Team_e::black);
                 _blackFigures.emplace_back(temp);
-                // add pawn into tile array
+                // add piece into tile array
                 _tiles[x][y].SetFigure(temp);
+
+                if(x == 1 && y == 4)
+                    x = 1, y = 0;
+                if(x == 3 && y == 4)
+                    x = 3, y = 0;
             }
         }
     }
@@ -150,14 +180,22 @@ void Board_t::SetUpTiles()
 void Board_t::SetUpTextures()
 {
     // Setup textures for everything
-    if(!_whitePawn.loadFromFile("../textures/whitePawn.jpg"))
-        throw std::runtime_error("\"whitePawn.jpg not found!\"");
+    if(!_whitePiece.loadFromFile("../textures/whitePiece.jpg"))
+        throw std::runtime_error("\"whitePiece.jpg not found!\"");
 
-    if(!_blackPawn.loadFromFile("../textures/blackPawn.jpg"))
-        throw std::runtime_error("\"blackPawn.jpg not found!\"");
+    if(!_blackPiece.loadFromFile("../textures/blackPiece.jpg"))
+        throw std::runtime_error("\"blackPiece.jpg not found!\"");
 
-    _whitePawn.setSmooth(true);
-    _blackPawn.setSmooth(true);
+    if(!_blackKing.loadFromFile("../textures/blackKing.jpg"))
+        throw std::runtime_error("\"blackKing.jpg not found!\"");
+
+    if(!_whiteKing.loadFromFile("../textures/whiteKing.jpg"))
+        throw std::runtime_error("\"_whiteKing.jpg not found!\"");
+
+    _whitePiece.setSmooth(true);
+    _blackPiece.setSmooth(true);
+    _whiteKing.setSmooth(true);
+    _blackKing.setSmooth(true);
 }
 
 } // namespace pamsi

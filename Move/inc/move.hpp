@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <bits/stdc++.h>
 
 namespace pamsi {
 
@@ -18,6 +19,7 @@ public:
         : _source{src}, _destination{dest}, _target{trgt}
     {
     }
+    Move_t() : Move_t(sf::Vector2u(INT_MAX, INT_MAX), sf::Vector2u(INT_MAX, INT_MAX)){};
     sf::Vector2u GetSource() { return _source; };
     sf::Vector2u GetDestination() { return _destination; };
     std::shared_ptr<Figure_t> GetTaken() { return _target; };

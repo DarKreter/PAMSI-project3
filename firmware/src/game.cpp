@@ -27,6 +27,7 @@ namespace pamsi {
 void Game(pamsi::Board_t& board, std::mutex& mtx)
 {
     // white always starts
+    static std::shared_ptr<Figure_t> lastMovedFigure = nullptr;
     pamsi::Team_e whoseTurn = pamsi::Team_e::white;
     bool figureTaken = false;
 
@@ -45,7 +46,11 @@ void Game(pamsi::Board_t& board, std::mutex& mtx)
         }
 
         // Get all possible moves for current player
-        auto allMoves = std::move(board.GetAllPossibleMoves(whoseTurn, figureTaken));
+        std::vector<Move_t> allMoves;
+        if(!figureTaken)
+            allMoves = std::move(board.GetAllPossibleMoves(whoseTurn, figureTaken));
+        else
+            allMoves = lastMovedFigure->GetAttackMoves();
 
         // DEBUG
         // for(auto& move : allMoves) {
@@ -54,6 +59,8 @@ void Game(pamsi::Board_t& board, std::mutex& mtx)
         //               << move.GetTaken() << std::endl;
         // }
         // std::cout << std::endl;
+
+        Move_t playerMove;
         // If there is no moves for player and he didn't do any move already
         if(!figureTaken && allMoves.empty()) {
             std::cout << "DRAW!" << std::endl;
@@ -69,7 +76,7 @@ void Game(pamsi::Board_t& board, std::mutex& mtx)
         else {
             // Get valid move from player
             // Move_t playerMove = GetValidMoveFromPlayer(allMoves);
-            Move_t playerMove = *(std::end(allMoves) - 1);
+            playerMove = *(std::end(allMoves) - 1);
             // Move_t playerMove = *select_randomly(allMoves.begin(), allMoves.end());
             getchar();
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -79,6 +86,9 @@ void Game(pamsi::Board_t& board, std::mutex& mtx)
             board.MoveFigure(playerMove);
             mtx.unlock();
 
+            lastMovedFigure =
+                board(playerMove.GetDestination().x, playerMove.GetDestination().y).GetFigure();
+
             if(playerMove.GetTaken()) {
                 figureTaken = true;
                 continue;
@@ -87,11 +97,21 @@ void Game(pamsi::Board_t& board, std::mutex& mtx)
                 figureTaken = false;
         }
 
-        // Change player
-        if(whoseTurn == pamsi::Team_e::white)
+        // Check if piece reach last row and then change it to king
+        // also hange player
+        if(whoseTurn == pamsi::Team_e::white) {
             whoseTurn = pamsi::Team_e::black;
-        else if(whoseTurn == pamsi::Team_e::black)
+            if(lastMovedFigure->GetCoordinates().y == 0) {
+                board.ChangePieceToKing(lastMovedFigure);
+            }
+        }
+        else if(whoseTurn == pamsi::Team_e::black) {
             whoseTurn = pamsi::Team_e::white;
+
+            if(lastMovedFigure->GetCoordinates().y == 7) {
+                board.ChangePieceToKing(lastMovedFigure);
+            }
+        }
     }
 }
 
