@@ -36,7 +36,7 @@ public:
     float GetBorderWidth() { return _borderWidth; }
     float GetTileLength() { return _tileLength; }
     float GetFigureRadius() { return _figureRadius; }
-    std::vector<Move_t> GetAllPossibleMoves(Team_e player);
+    std::vector<Move_t> GetAllPossibleMoves(Team_e player, bool figureAlreadyTaken);
     pamsi::Tile_t& operator()(uint8_t x, uint8_t y);
 
 private:

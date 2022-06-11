@@ -11,20 +11,20 @@ class Figure_t;
 class Move_t {
     sf::Vector2u _source;
     sf::Vector2u _destination;
-    std::shared_ptr<Figure_t> _attacked;
+    std::shared_ptr<Figure_t> _target;
 
 public:
-    Move_t(sf::Vector2u src, sf::Vector2u dest, std::shared_ptr<Figure_t> attck = nullptr)
-        : _source{src}, _destination{dest}, _attacked{attck}
+    Move_t(sf::Vector2u src, sf::Vector2u dest, std::shared_ptr<Figure_t> trgt = nullptr)
+        : _source{src}, _destination{dest}, _target{trgt}
     {
     }
     sf::Vector2u GetSource() { return _source; };
     sf::Vector2u GetDestination() { return _destination; };
-    std::shared_ptr<Figure_t> GetAttacked() { return _attacked; };
+    std::shared_ptr<Figure_t> GetTaken() { return _target; };
 
     void SetSource(sf::Vector2u source) { _source = source; }
     void SetDestination(sf::Vector2u dest) { _destination = dest; }
-    void SetAttacked(std::shared_ptr<Figure_t> atck) { _attacked = atck; }
+    void SetAttacked(std::shared_ptr<Figure_t> atck) { _target = atck; }
 
     bool operator==(const Move_t& move)
     {

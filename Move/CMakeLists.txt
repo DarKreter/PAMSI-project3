@@ -6,5 +6,5 @@ add_library(move STATIC ${SRC_LIST} ${HEADER_LIST})
 
 target_include_directories(move PUBLIC . inc src)
 
-target_link_libraries(move PUBLIC ${DEPENDENCIES_LIST} figure)
-add_dependencies(move ${DEPENDENCIES_LIST})
+target_link_libraries(move PUBLIC ${DEPENDENCIES_LIST})
+# add_dependencies(move ${DEPENDENCIES_LIST})

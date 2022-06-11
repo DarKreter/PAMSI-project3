@@ -3,7 +3,6 @@
 
 #include "move.hpp"
 #include <SFML/Graphics.hpp>
-#include <list>
 
 namespace pamsi {
 

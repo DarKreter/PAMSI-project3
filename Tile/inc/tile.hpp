@@ -1,13 +1,12 @@
 #ifndef TILE_PAMSI_PROJECT_DEFINE_H
 #define TILE_PAMSI_PROJECT_DEFINE_H
 
-#include "figure.hpp"
 #include <SFML/Graphics.hpp>
 #include <memory>
 
-class Figure_t;
-
 namespace pamsi {
+
+class Figure_t;
 
 class Tile_t : public sf::Drawable, public sf::Transformable {
     sf::RectangleShape _shape;

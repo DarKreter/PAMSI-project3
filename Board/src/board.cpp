@@ -3,40 +3,49 @@
 #include <algorithm>
 #include <iostream>
 
-
 namespace pamsi {
 
 pamsi::Tile_t& Board_t::operator()(uint8_t x, uint8_t y) { return _tiles.at(x).at(y); }
 
 void Board_t::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
+    // draw all tiles
     for(auto& a : _tiles)
         for(auto& tile : a)
             target.draw(tile, states);
 
+    // all white figures
     for(auto& figure : _whiteFigures)
-
         target.draw(*figure, states);
 
+    // and all black figures
     for(auto& figure : _blackFigures)
         target.draw(*figure, states);
 }
 
 void Board_t::MoveFigure(pamsi::Move_t move)
 {
+    // Get figure that wants to move
     auto f = _tiles[move.GetSource().x][move.GetSource().y].GetFigure();
+    // Change its coordinates
     f->SetCoordinates(move.GetDestination());
 
+    // Move it on tiles array
     _tiles[move.GetSource().x][move.GetSource().y].SetFigure(nullptr);
     _tiles[move.GetDestination().x][move.GetDestination().y].SetFigure(f);
 
-    if(auto destroyedFigure = move.GetAttacked()) {
-        _whiteFigures.erase(
-            std::remove(_whiteFigures.begin(), _whiteFigures.end(), destroyedFigure),
-            _whiteFigures.end());
-        _blackFigures.erase(
-            std::remove(_blackFigures.begin(), _blackFigures.end(), destroyedFigure),
-            _blackFigures.end());
+    // If it was attack, remove taken guy
+    if(auto destroyedFigure = move.GetTaken()) {
+        // remove from proper container
+        if(f->GetTeam() == Team_e::white)
+            _blackFigures.erase(
+                std::remove(_blackFigures.begin(), _blackFigures.end(), destroyedFigure),
+                _blackFigures.end());
+        if(f->GetTeam() == Team_e::black)
+            _whiteFigures.erase(
+                std::remove(_whiteFigures.begin(), _whiteFigures.end(), destroyedFigure),
+                _whiteFigures.end());
+        // remove this guy from tiles array (he's ded now)
         _tiles[destroyedFigure->GetCoordinates().x][destroyedFigure->GetCoordinates().y].SetFigure(
             nullptr);
     }
@@ -44,20 +53,24 @@ void Board_t::MoveFigure(pamsi::Move_t move)
 
 bool Board_t::CheckLoseConditions(Team_e player)
 {
+    // Player lose if he has no figures
     return (player == Team_e::white ? _whiteFigures : _blackFigures).empty();
 }
 
-std::vector<Move_t> Board_t::GetAllPossibleMoves(Team_e player)
+std::vector<Move_t> Board_t::GetAllPossibleMoves(Team_e player, bool figureAlreadyTaken)
 {
+    // Get proper container
     auto figures = (player == Team_e::white ? _whiteFigures : _blackFigures);
 
     // Create list of all moves
     std::vector<Move_t> allMoves;
+    // First check if there is any attack moves
     for(std::shared_ptr<Figure_t> figure : figures)
         for(auto attackMove : figure->GetAttackMoves())
             allMoves.emplace_back(attackMove);
 
-    if(allMoves.empty())
+    // If not, get all normal moves
+    if(allMoves.empty() && !figureAlreadyTaken)
         for(std::shared_ptr<Figure_t> figure : figures)
             for(auto normalMove : figure->GetNormalMoves())
                 allMoves.emplace_back(normalMove);
@@ -79,21 +92,15 @@ void Board_t::SetUpFigures()
     for(size_t x = 0; x < 8; x++) {
         for(size_t y = 5; y < 8; y++) {
             if(x % 2 != y % 2) {
-                // if(x == 3 && y == 6)
-                //     x = 2, y = 3;
-                // if(x == 4 && y == 5)
-                //     continue;
+                // Configure pawn
                 auto temp = std::make_shared<Pawn_t>(_figureRadius);
                 temp->SetBoard(this);
                 temp->SetTexture(_whitePawn);
                 temp->SetCoordinates(sf::Vector2u(x, y));
                 temp->SetTeam(Team_e::white);
                 _whiteFigures.emplace_back(temp);
-
+                // add pawn into tile array
                 _tiles[x][y].SetFigure(temp);
-
-                // if(x == 2 && y == 3)
-                //     x = 3, y = 6;
             }
         }
     }
@@ -103,32 +110,19 @@ void Board_t::SetUpFigures()
             auto temp = std::make_shared<Pawn_t>(_figureRadius);
 
             if(x % 2 != y % 2) {
-                // if(x == 0 && y == 1)
-                //     x = 1, y = 4;
-                // if(x == 2 && y == 1)
-                //     x = 0, y = 3;
-                // if(x == 1 && y == 2)
-                //     x = 3, y = 4;
-                // if(x == 4 && y == 1)
-                //     continue;
+                // configure pawn
                 temp->SetBoard(this);
                 temp->SetTexture(_blackPawn);
                 temp->SetCoordinates(sf::Vector2u(x, y));
                 temp->SetTeam(Team_e::black);
                 _blackFigures.emplace_back(temp);
-
+                // add pawn into tile array
                 _tiles[x][y].SetFigure(temp);
-
-                // if(x == 1 && y == 4)
-                //     x = 0, y = 1;
-                // if(x == 0 && y == 3)
-                //     x = 2, y = 1;
-                // if(x == 3 && y == 4)
-                //     x = 1, y = 2;
             }
         }
     }
 }
+
 void Board_t::SetUpTiles()
 {
     // Setup tiles
@@ -138,11 +132,11 @@ void Board_t::SetUpTiles()
 
             pamsi::Tile_t temp(sf::Vector2f(_tileLength, _tileLength));
 
+            // Get them proper color
             if(x % 2 != y % 2)
                 temp.SetColor(fillColor_1);
             else
                 temp.SetColor(fillColor_2);
-
             temp.SetBorderWidth(_borderWidth);
             temp.SetOutlineColor(outlineColor);
             temp.SetPosition(sf::Vector2f(x * _tileLength, y * _tileLength));
@@ -155,10 +149,11 @@ void Board_t::SetUpTiles()
 
 void Board_t::SetUpTextures()
 {
-    if(!_whitePawn.loadFromFile("whitePawn.jpg"))
+    // Setup textures for everything
+    if(!_whitePawn.loadFromFile("../textures/whitePawn.jpg"))
         throw std::runtime_error("\"whitePawn.jpg not found!\"");
 
-    if(!_blackPawn.loadFromFile("blackPawn.jpg"))
+    if(!_blackPawn.loadFromFile("../textures/blackPawn.jpg"))
         throw std::runtime_error("\"blackPawn.jpg not found!\"");
 
     _whitePawn.setSmooth(true);

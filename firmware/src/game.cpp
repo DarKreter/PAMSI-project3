@@ -4,15 +4,37 @@
 #include <iostream>
 #include <thread>
 
+#include <iterator>
+#include <random>
+
+template <typename Iter, typename RandomGenerator>
+Iter select_randomly(Iter start, Iter end, RandomGenerator& g)
+{
+    std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
+    std::advance(start, dis(g));
+    return start;
+}
+
+template <typename Iter>
+Iter select_randomly(Iter start, Iter end)
+{
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    return select_randomly(start, end, gen);
+}
+
 namespace pamsi {
 void Game(pamsi::Board_t& board, std::mutex& mtx)
 {
     // white always starts
     pamsi::Team_e whoseTurn = pamsi::Team_e::white;
+    bool figureTaken = false;
+
+    getchar();
     while(true) {
 
         // Check lose conditions
-        if(board.CheckLoseConditions(whoseTurn)) {
+        if(!figureTaken && board.CheckLoseConditions(whoseTurn)) {
             std::cout << "GAME OVER!" << std::endl;
             if(whoseTurn == pamsi::Team_e::white)
                 std::cout << "BLACK WON!" << std::endl;
@@ -23,31 +45,47 @@ void Game(pamsi::Board_t& board, std::mutex& mtx)
         }
 
         // Get all possible moves for current player
-        auto allMoves = board.GetAllPossibleMoves(whoseTurn);
+        auto allMoves = std::move(board.GetAllPossibleMoves(whoseTurn, figureTaken));
 
-        for(auto& move : allMoves) {
-            std::cout << move.GetSource().x << " " << move.GetSource().y << "\t"
-                      << move.GetDestination().x << " " << move.GetDestination().y << "\t"
-                      << move.GetAttacked() << std::endl;
-        }
-        // If there is no moves for player, it's draw
-        if(allMoves.empty()) {
+        // DEBUG
+        // for(auto& move : allMoves) {
+        //     std::cout << move.GetSource().x << " " << move.GetSource().y << "\t"
+        //               << move.GetDestination().x << " " << move.GetDestination().y << "\t"
+        //               << move.GetTaken() << std::endl;
+        // }
+        // std::cout << std::endl;
+        // If there is no moves for player and he didn't do any move already
+        if(!figureTaken && allMoves.empty()) {
             std::cout << "DRAW!" << std::endl;
             std::cout << "GAME OVER!" << std::endl;
             getchar();
             exit(0);
         }
+        // He don't have moves but already make some
+        else if(figureTaken && allMoves.empty()) {
+            figureTaken = false;
+        }
+        // He has move
+        else {
+            // Get valid move from player
+            // Move_t playerMove = GetValidMoveFromPlayer(allMoves);
+            Move_t playerMove = *(std::end(allMoves) - 1);
+            // Move_t playerMove = *select_randomly(allMoves.begin(), allMoves.end());
+            getchar();
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        // Get valid move from player
-        // Move_t playerMove = GetValidMoveFromPlayer(allMoves);
-        Move_t playerMove = allMoves.at(0);
-        // getchar();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            // Move
+            mtx.lock();
+            board.MoveFigure(playerMove);
+            mtx.unlock();
 
-        // Move
-        mtx.lock();
-        board.MoveFigure(playerMove);
-        mtx.unlock();
+            if(playerMove.GetTaken()) {
+                figureTaken = true;
+                continue;
+            }
+            else
+                figureTaken = false;
+        }
 
         // Change player
         if(whoseTurn == pamsi::Team_e::white)
@@ -56,6 +94,8 @@ void Game(pamsi::Board_t& board, std::mutex& mtx)
             whoseTurn = pamsi::Team_e::white;
     }
 }
+
+void NormalMove() {}
 
 Move_t GetValidMoveFromPlayer(std::vector<Move_t>& allMoves)
 {
