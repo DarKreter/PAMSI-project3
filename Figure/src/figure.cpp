@@ -1,11 +1,22 @@
 #include "figure.hpp"
+#include "board.hpp"
+#include <iostream>
 
 namespace pamsi {
 
 void Figure_t::SetPosition(sf::Vector2f position) { _shape.setPosition(position); }
 
+static inline sf::Vector2f CalcPos(float x, float y, float tileLength, float borderWidth)
+{
+    return sf::Vector2f(x * tileLength + borderWidth / 2.f + (tileLength - borderWidth) * 0.05f,
+                        y * tileLength + borderWidth / 2.f + (tileLength - borderWidth) * 0.05f);
+}
+
 void Figure_t::SetCoordinates(sf::Vector2u coord)
 {
+    this->SetPosition(
+        CalcPos(coord.x, coord.y, _myBoard->GetTileLength(), _myBoard->GetBorderWidth()));
+
     _coord.x = coord.x;
     _coord.y = coord.y;
 }
@@ -28,7 +39,7 @@ void Figure_t::draw(sf::RenderTarget& target, sf::RenderStates states) const
     target.draw(_shape, states);
 }
 
-std::vector<sf::Vector2i> Figure_t::GetPossibleMoves()
+std::vector<pamsi::Move_t> Figure_t::GetPossibleMoves()
 {
     auto normalMoves = GetNormalMoves();
     auto attackMoves = GetAttackMoves();

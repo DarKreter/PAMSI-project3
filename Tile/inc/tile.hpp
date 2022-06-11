@@ -5,6 +5,8 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 
+class Figure_t;
+
 namespace pamsi {
 
 class Tile_t : public sf::Drawable, public sf::Transformable {
@@ -18,7 +20,7 @@ public:
     void SetOutlineColor(sf::Color outlineColor);
     void SetPosition(sf::Vector2f position);
     void SetBorderWidth(float borderWidth);
-    std::shared_ptr<Figure_t>& GetFigure() { return _figure; }
+    std::shared_ptr<Figure_t> GetFigure() { return _figure; }
     void SetFigure(std::shared_ptr<Figure_t> figure);
 
 private:

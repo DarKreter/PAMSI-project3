@@ -19,17 +19,25 @@ class Board_t : public sf::Drawable {
 
     sf::Texture _whitePawn, _blackPawn;
 
-    void SetUpTextures();
-    void SetUpFigures(float windowsSize, float borderWidth);
-    void SetUpTiles(float windowsSize, float borderWidth);
+    float _borderWidth;
+    float _tileLength;
+    float _figureRadius;
 
-    typedef std::vector<std::pair<sf::Vector2i, sf::Vector2i>> movesVector;
+    void SetUpTextures();
+    void SetUpFigures();
+    void SetUpTiles();
 
 public:
+
     Board_t(float windowsSize, float borderWidth);
     bool CheckLoseConditions(Team_e player);
-    movesVector GetAllPossibleMoves(Team_e player);
-    pamsi::Tile_t operator()(uint8_t x, uint8_t y);
+    void MoveFigure(pamsi::Move_t move);
+
+    float GetBorderWidth() { return _borderWidth; }
+    float GetTileLength() { return _tileLength; }
+    float GetFigureRadius() { return _figureRadius; }
+    std::vector<Move_t> GetAllPossibleMoves(Team_e player);
+    pamsi::Tile_t& operator()(uint8_t x, uint8_t y);
 
 private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;

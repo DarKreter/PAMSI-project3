@@ -22,8 +22,8 @@ int main()
     // text.setCharacterSize(100); // in pixels, not points!
     // text.setFillColor(sf::Color(0xff5f51ff));
     // text.setStyle(sf::Text::Bold);
-
     pamsi::Board_t board(windowsSize, borderWidth);
+
 
     std::thread sfmlLoop(pamsi::sfmlLoop, std::ref(board));
     std::thread realGame(pamsi::Game, std::ref(board));

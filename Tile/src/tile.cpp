@@ -9,7 +9,7 @@ void Tile_t::SetBorderWidth(float borderWidth) { _shape.setOutlineThickness(-bor
 
 void Tile_t::SetFigure(std::shared_ptr<Figure_t> figure)
 {
-    if(_figure)
+    if(_figure && figure)
         throw std::runtime_error("Figure already here!");
     _figure = figure;
 }

@@ -12,6 +12,7 @@ add_compile_options(${CPU_OPTIONS})
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 add_subdirectory(SFML)
+add_subdirectory(Move)
 add_subdirectory(Tile)
 add_subdirectory(Figure)
 add_subdirectory(Pawn)
