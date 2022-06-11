@@ -125,16 +125,11 @@ void Board_t::SetUpFigures()
             }
         }
     }
-
     for(size_t x = 0; x < 8; x++) {
         for(size_t y = 0; y < 3; y++) {
             auto temp = std::make_shared<Piece_t>(_figureRadius);
 
             if(x % 2 != y % 2) {
-                if(x == 1 && y == 0)
-                    x = 1, y = 4;
-                if(x == 3 && y == 0)
-                    x = 3, y = 4;
                 // configure piece
                 temp->SetBoard(this);
                 temp->SetTexture(_blackPiece);
@@ -143,11 +138,6 @@ void Board_t::SetUpFigures()
                 _blackFigures.emplace_back(temp);
                 // add piece into tile array
                 _tiles[x][y].SetFigure(temp);
-
-                if(x == 1 && y == 4)
-                    x = 1, y = 0;
-                if(x == 3 && y == 4)
-                    x = 3, y = 0;
             }
         }
     }
@@ -170,7 +160,6 @@ void Board_t::SetUpTiles()
             temp.SetBorderWidth(_borderWidth);
             temp.SetOutlineColor(outlineColor);
             temp.SetPosition(sf::Vector2f(x * _tileLength, y * _tileLength));
-
             tempVector.emplace_back(temp);
         }
         _tiles.emplace_back(tempVector);

@@ -53,12 +53,12 @@ void Game(pamsi::Board_t& board, std::mutex& mtx)
             allMoves = lastMovedFigure->GetAttackMoves();
 
         // DEBUG
-        // for(auto& move : allMoves) {
-        //     std::cout << move.GetSource().x << " " << move.GetSource().y << "\t"
-        //               << move.GetDestination().x << " " << move.GetDestination().y << "\t"
-        //               << move.GetTaken() << std::endl;
-        // }
-        // std::cout << std::endl;
+        for(auto& move : allMoves) {
+            std::cout << move.GetSource().x << " " << move.GetSource().y << "\t"
+                      << move.GetDestination().x << " " << move.GetDestination().y << "\t"
+                      << move.GetTaken() << std::endl;
+        }
+        std::cout << std::endl;
 
         Move_t playerMove;
         // If there is no moves for player and he didn't do any move already
@@ -75,11 +75,11 @@ void Game(pamsi::Board_t& board, std::mutex& mtx)
         // He has move
         else {
             // Get valid move from player
-            // Move_t playerMove = GetValidMoveFromPlayer(allMoves);
-            playerMove = *(std::end(allMoves) - 1);
-            // Move_t playerMove = *select_randomly(allMoves.begin(), allMoves.end());
-            getchar();
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            // playerMove = GetValidMoveFromPlayer(allMoves);
+            // playerMove = *(std::end(allMoves) - 1);
+            playerMove = *select_randomly(allMoves.begin(), allMoves.end());
+            // getchar();
+            std::this_thread::sleep_for(std::chrono::seconds(2));
 
             // Move
             mtx.lock();
