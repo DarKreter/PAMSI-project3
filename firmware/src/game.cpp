@@ -1,10 +1,41 @@
 #include "game.hpp"
+#include <iostream>
 
 namespace pamsi {
-void Game([[maybe_unused]] pamsi::Board_t& board)
+void Game(pamsi::Board_t& board)
 {
-    while(1)
-        ;
+    pamsi::Team_e whoseTurn = pamsi::Team_e::white;
+    while(true) {
+        // Check lose conditions
+        if(board.CheckLoseConditions(whoseTurn)) {
+            std::cout << "GAME OVER!" << std::endl;
+            if(whoseTurn == pamsi::Team_e::white)
+                std::cout << "BLACK WON!" << std::endl;
+            else if(whoseTurn == pamsi::Team_e::black)
+                std::cout << "WHITE WON!" << std::endl;
+            exit(0);
+        }
+
+        // Check Draw conditions (checking if there is any move that can be done
+        // but return false with first occurrence)
+        if(board.CheckDrawConditions(whoseTurn)) {
+            std::cout << "DRAW!" << std::endl;
+            std::cout << "GAME OVER!" << std::endl;
+            exit(0);
+        }
+
+        // Get move from player
+
+        // Check if it's valid
+
+        // Move
+
+        // Change player
+        if(whoseTurn == pamsi::Team_e::white)
+            whoseTurn = pamsi::Team_e::black;
+        else if(whoseTurn == pamsi::Team_e::black)
+            whoseTurn = pamsi::Team_e::white;
+    }
 }
 
 constexpr size_t windowsSize = 1000;

@@ -1,6 +1,5 @@
 #include "board.hpp"
 #include "game.hpp"
-#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <thread>
 
@@ -27,10 +26,10 @@ int main()
     pamsi::Board_t board(windowsSize, borderWidth);
 
     std::thread sfmlLoop(pamsi::sfmlLoop, std::ref(board));
-    // std::thread realGame(pamsi::Game, &board);
+    std::thread realGame(pamsi::Game, std::ref(board));
 
     sfmlLoop.join();
-    // realGame.join();
+    realGame.join();
 
     return 0;
 }

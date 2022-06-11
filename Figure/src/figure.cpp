@@ -6,6 +6,13 @@ void Figure_t::SetPosition(sf::Vector2f position)
 {
     _shape.setPosition(position);
 }
+
+void Figure_t::SetCoordinates(sf::Vector2u coord)
+{
+    _coord.x = coord.x;
+    _coord.y = coord.y;
+}
+
 void Figure_t::SetTexture(sf::Texture& texture)
 {
     _shape.setTexture(&texture); // texture is a sf::Texture

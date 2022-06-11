@@ -1,4 +1,5 @@
 #include "board.hpp"
+#include "pawn.hpp"
 #include <iostream>
 
 namespace pamsi {
@@ -14,6 +15,23 @@ void Board_t::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
     for(auto& figure : blackFigures)
         target.draw(*figure, states);
+}
+
+bool Board_t::CheckLoseConditions(Team_e player)
+{
+    return (player == Team_e::white ? whiteFigures : blackFigures).empty();
+}
+
+bool Board_t::CheckDrawConditions(Team_e player)
+{
+    auto figures = (player == Team_e::white ? whiteFigures : blackFigures);
+
+    for(std::shared_ptr<Figure_t> figure : figures) {
+        auto movesList = figure->GetPossibleMoves();
+        if(!movesList.empty())
+            return false;
+    }
+    return true;
 }
 
 Board_t::Board_t(float windowsSize, float borderWidth)
@@ -37,11 +55,13 @@ void Board_t::SetUpFigures(float windowsSize, float borderWidth)
 
     for(size_t x = 0; x < 8; x++) {
         for(size_t y = 5; y < 8; y++) {
-            auto temp = std::make_shared<Figure_t>(figureRadius);
 
             if(x % 2 != y % 2) {
+                auto temp = std::make_shared<Pawn_t>(figureRadius);
                 temp->SetTexture(whitePawn);
                 temp->SetPosition(calcPos(x, y));
+                temp->SetCoordinates(sf::Vector2u(x, y));
+                temp->SetTeam(Team_e::white);
                 whiteFigures.emplace_back(temp);
             }
         }
@@ -49,11 +69,13 @@ void Board_t::SetUpFigures(float windowsSize, float borderWidth)
 
     for(size_t x = 0; x < 8; x++) {
         for(size_t y = 0; y < 3; y++) {
-            auto temp = std::make_shared<Figure_t>(figureRadius);
+            auto temp = std::make_shared<Pawn_t>(figureRadius);
 
             if(x % 2 != y % 2) {
                 temp->SetTexture(blackPawn);
                 temp->SetPosition(calcPos(x, y));
+                temp->SetCoordinates(sf::Vector2u(x, y));
+                temp->SetTeam(Team_e::black);
                 blackFigures.emplace_back(temp);
             }
         }

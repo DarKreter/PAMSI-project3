@@ -12,7 +12,6 @@
 #define outlineColor sf::Color::Black
 
 namespace pamsi {
-
 class Board_t : public sf::Drawable {
     std::vector<std::vector<pamsi::Tile_t>> tiles;
     std::vector<std::shared_ptr<Figure_t>> whiteFigures;
@@ -26,6 +25,8 @@ class Board_t : public sf::Drawable {
 
 public:
     Board_t(float windowsSize, float borderWidth);
+    bool CheckLoseConditions(Team_e player);
+    bool CheckDrawConditions(Team_e player);
 
 private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
