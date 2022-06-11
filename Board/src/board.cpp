@@ -1,6 +1,8 @@
 #include "board.hpp"
 #include "pawn.hpp"
+#include <algorithm>
 #include <iostream>
+
 
 namespace pamsi {
 
@@ -27,6 +29,17 @@ void Board_t::MoveFigure(pamsi::Move_t move)
 
     _tiles[move.GetSource().x][move.GetSource().y].SetFigure(nullptr);
     _tiles[move.GetDestination().x][move.GetDestination().y].SetFigure(f);
+
+    if(auto destroyedFigure = move.GetAttacked()) {
+        _whiteFigures.erase(
+            std::remove(_whiteFigures.begin(), _whiteFigures.end(), destroyedFigure),
+            _whiteFigures.end());
+        _blackFigures.erase(
+            std::remove(_blackFigures.begin(), _blackFigures.end(), destroyedFigure),
+            _blackFigures.end());
+        _tiles[destroyedFigure->GetCoordinates().x][destroyedFigure->GetCoordinates().y].SetFigure(
+            nullptr);
+    }
 }
 
 bool Board_t::CheckLoseConditions(Team_e player)

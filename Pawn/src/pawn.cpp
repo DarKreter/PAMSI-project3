@@ -46,12 +46,12 @@ std::vector<pamsi::Move_t> Pawn_t::GetAttackMoves()
                 (*_myBoard)(_coord.x + option.x, _coord.y + option.y).GetFigure();
             // There is someone and is from opponents team
             if(figure != nullptr && figure->GetTeam() != _team) {
-                auto attacked =
-                    (*_myBoard)(_coord.x + 2 * option.x, _coord.y + 2 * option.y).GetFigure();
-                if(!attacked)
+                auto a = (*_myBoard)(_coord.x + 2 * option.x, _coord.y + 2 * option.y).GetFigure();
+                if(!a) {
                     moves.emplace_back(Move_t(
                         _coord, sf::Vector2u(_coord.x + 2 * option.x, _coord.y + 2 * option.y),
-                        attacked));
+                        figure));
+                }
             }
         }
         catch(std::out_of_range& e) {

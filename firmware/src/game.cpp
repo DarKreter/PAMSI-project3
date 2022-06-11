@@ -1,9 +1,11 @@
 #include "game.hpp"
 #include "move.hpp"
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 namespace pamsi {
-void Game(pamsi::Board_t& board)
+void Game(pamsi::Board_t& board, std::mutex& mtx)
 {
     // white always starts
     pamsi::Team_e whoseTurn = pamsi::Team_e::white;
@@ -16,6 +18,7 @@ void Game(pamsi::Board_t& board)
                 std::cout << "BLACK WON!" << std::endl;
             else if(whoseTurn == pamsi::Team_e::black)
                 std::cout << "WHITE WON!" << std::endl;
+            getchar();
             exit(0);
         }
 
@@ -31,14 +34,20 @@ void Game(pamsi::Board_t& board)
         if(allMoves.empty()) {
             std::cout << "DRAW!" << std::endl;
             std::cout << "GAME OVER!" << std::endl;
+            getchar();
             exit(0);
         }
 
         // Get valid move from player
-        Move_t playerMove = GetValidMoveFromPlayer(allMoves);
+        // Move_t playerMove = GetValidMoveFromPlayer(allMoves);
+        Move_t playerMove = allMoves.at(0);
+        // getchar();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         // Move
+        mtx.lock();
         board.MoveFigure(playerMove);
+        mtx.unlock();
 
         // Change player
         if(whoseTurn == pamsi::Team_e::white)
@@ -76,13 +85,13 @@ Move_t GetValidMoveFromPlayer(std::vector<Move_t>& allMoves)
 
     std::cout << "Valid move!" << std::endl;
 
-    return myMove;
+    return *result;
 }
 
 constexpr size_t windowsSize = 1000;
 constexpr size_t borderWidth = 5.f;
 
-void sfmlLoop(pamsi::Board_t& board)
+void sfmlLoop(pamsi::Board_t& board, std::mutex& mtx)
 {
     sf::RenderWindow window(sf::VideoMode(windowsSize, windowsSize), "Checkers!",
                             sf::Style::Default);
@@ -103,7 +112,9 @@ void sfmlLoop(pamsi::Board_t& board)
         // clear the window with black color
         window.clear(sf::Color::White);
 
+        mtx.lock();
         window.draw(board);
+        mtx.unlock();
         // end the current frame
         window.display();
     }

@@ -1,7 +1,9 @@
 #include "board.hpp"
 #include "game.hpp"
 #include <iostream>
+#include <mutex>
 #include <thread>
+
 
 using namespace std;
 
@@ -24,9 +26,9 @@ int main()
     // text.setStyle(sf::Text::Bold);
     pamsi::Board_t board(windowsSize, borderWidth);
 
-
-    std::thread sfmlLoop(pamsi::sfmlLoop, std::ref(board));
-    std::thread realGame(pamsi::Game, std::ref(board));
+    std::mutex mtx;
+    std::thread sfmlLoop(pamsi::sfmlLoop, std::ref(board), std::ref(mtx));
+    std::thread realGame(pamsi::Game, std::ref(board), std::ref(mtx));
 
     sfmlLoop.join();
     realGame.join();
