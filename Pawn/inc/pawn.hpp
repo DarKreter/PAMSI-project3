@@ -10,7 +10,8 @@ class Pawn_t : public pamsi::Figure_t {
 public:
     Pawn_t(float radius) : Figure_t(radius){};
 
-    std::vector<sf::Vector2i> GetPossibleMoves() override;
+    std::vector<sf::Vector2i> GetNormalMoves() override;
+    std::vector<sf::Vector2i> GetAttackMoves() override;
 };
 
 } // namespace pamsi

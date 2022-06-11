@@ -25,24 +25,21 @@ bool Board_t::CheckLoseConditions(Team_e player)
     return (player == Team_e::white ? _whiteFigures : _blackFigures).empty();
 }
 
-bool Board_t::CheckDrawConditions(Team_e player)
+auto Board_t::GetAllPossibleMoves(Team_e player) -> movesVector
 {
     auto figures = (player == Team_e::white ? _whiteFigures : _blackFigures);
 
-    // std::List<>
     // Create list of all moves
+    std::vector<std::pair<sf::Vector2i, sf::Vector2i>> allMoves;
 
-    for(std::shared_ptr<Figure_t> figure : figures) {
-        auto movesList = figure->GetPossibleMoves();
-        std::cout << figure->GetCoordinates().x << " " << figure->GetCoordinates().y << "\t";
+    for(std::shared_ptr<Figure_t> figure : figures)
+        // std::cout << figure->GetCoordinates().x << " " << figure->GetCoordinates().y <<
+        // std::endl;
+        for(auto move : figure->GetPossibleMoves())
+            // std::cout << move.x << " " << move.y << std::endl;
+            allMoves.emplace_back(std::make_pair(figure->GetCoordinates(), move));
 
-        for(auto& move : movesList)
-            std::cout << move.x << " " << move.y << ", ";
-        std::cout << std::endl;
-        // if(!movesList.empty())
-        //     return false;
-    }
-    return true;
+    return allMoves;
 }
 
 Board_t::Board_t(float windowsSize, float borderWidth)
@@ -67,6 +64,10 @@ void Board_t::SetUpFigures(float windowsSize, float borderWidth)
         for(size_t y = 5; y < 8; y++) {
 
             if(x % 2 != y % 2) {
+                if(x == 3 && y == 6)
+                    x = 2, y = 3;
+                if(x == 4 && y == 5)
+                    continue;
                 auto temp = std::make_shared<Pawn_t>(figureRadius);
                 temp->SetTexture(_whitePawn);
                 temp->SetPosition(calcPos(x, y));
@@ -74,6 +75,11 @@ void Board_t::SetUpFigures(float windowsSize, float borderWidth)
                 temp->SetTeam(Team_e::white);
                 temp->SetBoard(this);
                 _whiteFigures.emplace_back(temp);
+
+                _tiles[x][y].SetFigure(temp);
+
+                if(x == 2 && y == 3)
+                    x = 3, y = 6;
             }
         }
     }
@@ -83,12 +89,29 @@ void Board_t::SetUpFigures(float windowsSize, float borderWidth)
             auto temp = std::make_shared<Pawn_t>(figureRadius);
 
             if(x % 2 != y % 2) {
+                if(x == 0 && y == 1)
+                    x = 1, y = 4;
+                if(x == 2 && y == 1)
+                    x = 0, y = 3;
+                if(x == 1 && y == 2)
+                    x = 3, y = 4;
+                if(x == 4 && y == 1)
+                    continue;
                 temp->SetTexture(_blackPawn);
                 temp->SetPosition(calcPos(x, y));
                 temp->SetCoordinates(sf::Vector2u(x, y));
                 temp->SetTeam(Team_e::black);
                 temp->SetBoard(this);
                 _blackFigures.emplace_back(temp);
+
+                _tiles[x][y].SetFigure(temp);
+
+                if(x == 1 && y == 4)
+                    x = 0, y = 1;
+                if(x == 0 && y == 3)
+                    x = 2, y = 1;
+                if(x == 3 && y == 4)
+                    x = 1, y = 2;
             }
         }
     }

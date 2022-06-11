@@ -19,6 +19,7 @@ public:
     void SetPosition(sf::Vector2f position);
     void SetBorderWidth(float borderWidth);
     std::shared_ptr<Figure_t>& GetFigure() { return _figure; }
+    void SetFigure(std::shared_ptr<Figure_t> figure);
 
 private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;

@@ -17,15 +17,22 @@ void Game(pamsi::Board_t& board)
             exit(0);
         }
 
-        // Check Draw conditions (checking if there is any move that can be done
-        // but return false with first occurrence)
-        if(board.CheckDrawConditions(whoseTurn)) {
-            while(true)
-                ;
+        // Get all possible moves for current player
+        auto allMoves = board.GetAllPossibleMoves(whoseTurn);
+
+        for(auto& move : allMoves) {
+            std::cout << move.first.x << " " << move.first.y << "\t" << move.second.x << " "
+                      << move.second.y << std::endl;
+        }
+        // If there is no moves for him, it's draw
+        if(allMoves.empty()) {
             std::cout << "DRAW!" << std::endl;
             std::cout << "GAME OVER!" << std::endl;
             exit(0);
         }
+
+        while(true)
+            ;
 
         // Get move from player
 

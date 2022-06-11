@@ -29,8 +29,13 @@ public:
     void SetCoordinates(sf::Vector2u coord);
     void SetTeam(Team_e team) { _team = team; }
     void SetBoard(pamsi::Board_t* board) { _myBoard = board; }
-    virtual std::vector<sf::Vector2i> GetPossibleMoves() = 0;
+
     sf::Vector2u& GetCoordinates() { return _coord; }
+    Team_e& GetTeam() { return _team; }
+
+    std::vector<sf::Vector2i> GetPossibleMoves();
+    virtual std::vector<sf::Vector2i> GetNormalMoves() = 0;
+    virtual std::vector<sf::Vector2i> GetAttackMoves() = 0;
 
 protected:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;

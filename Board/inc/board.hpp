@@ -7,7 +7,6 @@
 #include <memory>
 #include <vector>
 
-
 #define fillColor_1 sf::Color::Red
 #define fillColor_2 sf::Color::White
 #define outlineColor sf::Color::Black
@@ -24,11 +23,12 @@ class Board_t : public sf::Drawable {
     void SetUpFigures(float windowsSize, float borderWidth);
     void SetUpTiles(float windowsSize, float borderWidth);
 
+    typedef std::vector<std::pair<sf::Vector2i, sf::Vector2i>> movesVector;
+
 public:
     Board_t(float windowsSize, float borderWidth);
     bool CheckLoseConditions(Team_e player);
-    bool CheckDrawConditions(Team_e player);
-    std::vector<std::vector<pamsi::Tile_t>>& GetTiles() { return _tiles; }
+    movesVector GetAllPossibleMoves(Team_e player);
     pamsi::Tile_t operator()(uint8_t x, uint8_t y);
 
 private:
