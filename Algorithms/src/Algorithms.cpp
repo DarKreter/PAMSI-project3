@@ -100,26 +100,27 @@ Move_t PlayerMouse([[maybe_unused]] const std::vector<pamsi::Move_t>& allMoves,
     return *result;
 }
 
-std::vector<pamsi::Board_t> GetAllChildrenOfBoard(const pamsi::Board_t& father)
+std::vector<pamsi::Board_t> GetAllChildrenOfBoard(const pamsi::Board_t& father, Team_e whoseTurn, bool figureTaken, std::mutex& mtx)
 {
     std::vector<pamsi::Board_t> childrens;
-    Board_t dupa = father;
-    // dupa(1,1)
-    dupa._blackFigures.erase(
-        std::remove(dupa._blackFigures.begin(), dupa._blackFigures.end(), dupa(1, 0).GetFigure()),
-        dupa._blackFigures.end());
+    // Get all possible moves for current player
+    std::vector<Move_t> allMoves;
+    // if(!figureTaken)
+    allMoves = std::move(father.GetAllPossibleMoves(whoseTurn, figureTaken));
+    // else
+    //     allMoves = std::move(lastMovedFigure->GetAttackMoves());
 
-    childrens.emplace_back(dupa);
-
-    dupa = father;
-    // dupa(1,1)
-    dupa._blackFigures.erase(
-        std::remove(dupa._blackFigures.begin(), dupa._blackFigures.end(), dupa(3, 0).GetFigure()),
-        dupa._blackFigures.end());
-
-    childrens.emplace_back(dupa);
+    for(Move_t& move : allMoves) {
+        mtx.lock();
+        Board_t temp = father;
+        mtx.unlock();
+        temp.MoveFigure(move);
+        childrens.emplace_back(temp);
+    }
 
     return childrens;
 }
+
+
 
 } // namespace pamsi::algorithms

@@ -39,10 +39,10 @@ public:
     void MoveFigure(pamsi::Move_t move);
     void ChangePieceToKing(std::shared_ptr<Figure_t> figure);
 
-    float GetBorderWidth() { return _borderWidth; }
-    float GetTileLength() { return _tileLength; }
-    float GetFigureRadius() { return _figureRadius; }
-    std::vector<Move_t> GetAllPossibleMoves(Team_e player, bool figureAlreadyTaken);
+    float GetBorderWidth() const { return _borderWidth; }
+    float GetTileLength() const { return _tileLength; }
+    float GetFigureRadius() const { return _figureRadius; }
+    std::vector<Move_t> GetAllPossibleMoves(Team_e player, bool figureAlreadyTaken) const;
     pamsi::Tile_t& operator()(uint8_t x, uint8_t y);
 
 private:

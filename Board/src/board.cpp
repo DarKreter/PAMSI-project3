@@ -99,7 +99,7 @@ bool Board_t::CheckLoseConditions(Team_e player)
     return (player == Team_e::white ? _whiteFigures : _blackFigures).empty();
 }
 
-std::vector<Move_t> Board_t::GetAllPossibleMoves(Team_e player, bool figureAlreadyTaken)
+std::vector<Move_t> Board_t::GetAllPossibleMoves(Team_e player, bool figureAlreadyTaken) const
 {
     // Get proper container
     auto figures = (player == Team_e::white ? _whiteFigures : _blackFigures);

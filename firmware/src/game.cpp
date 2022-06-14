@@ -19,8 +19,8 @@ void Game(pamsi::Board_t& board, std::mutex& mtx,
     pamsi::Team_e whoseTurn = pamsi::Team_e::white;
     bool figureTaken = false;
 
-
-    std::vector<pamsi::Board_t> childrens = algorithms::GetAllChildrenOfBoard(board);
+    std::vector<pamsi::Board_t> childrens =
+        algorithms::GetAllChildrenOfBoard(board, whoseTurn, figureTaken, mtx);
     for(auto child : childrens) {
         mtx.lock();
         board = child;
