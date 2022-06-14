@@ -15,7 +15,7 @@ enum class Team_e
 };
 
 class Figure_t : public sf::Drawable, public sf::Transformable {
-public:
+protected:
     sf::CircleShape _shape;
     sf::Vector2u _coord;
     Team_e _team;
@@ -23,13 +23,13 @@ public:
 
     void SetPosition(sf::Vector2f position);
 
+public:
     enum class WhoAmI
     {
         Piece,
         King
-    } _whoAmI;
+    };
 
-public:
     Figure_t(float radius, WhoAmI whoAmI) : _shape(radius), _myBoard{NULL}, _whoAmI{whoAmI} {};
 
     void SetTexture(sf::Texture& texture);
@@ -39,12 +39,14 @@ public:
 
     sf::Vector2u& GetCoordinates() { return _coord; }
     Team_e& GetTeam() { return _team; }
+    WhoAmI GetWhoAmI() { return _whoAmI; }
 
     std::vector<pamsi::Move_t> GetPossibleMoves();
     virtual std::vector<pamsi::Move_t> GetNormalMoves() = 0;
     virtual std::vector<pamsi::Move_t> GetAttackMoves() = 0;
 
 protected:
+    WhoAmI _whoAmI;
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 };
 

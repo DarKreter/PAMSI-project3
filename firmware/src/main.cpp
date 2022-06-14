@@ -15,6 +15,14 @@ int main()
 {
     pamsi::Board_t board(windowsSize, borderWidth);
 
+    pamsi::Board_t dupa = board;
+    // dupa(1,1)
+    dupa._blackFigures.erase(
+        std::remove(dupa._blackFigures.begin(), dupa._blackFigures.end(), dupa(1, 0).GetFigure()),
+        dupa._blackFigures.end());
+
+    board = dupa;
+
     std::queue<sf::Vector2u> mouseQueue;
     bool reading = false;
     std::mutex mtx, queueMutex;

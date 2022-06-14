@@ -13,6 +13,7 @@
 
 namespace pamsi {
 class Board_t : public sf::Drawable {
+public:
     std::vector<std::vector<pamsi::Tile_t>> _tiles;
     std::vector<std::shared_ptr<Figure_t>> _whiteFigures;
     std::vector<std::shared_ptr<Figure_t>> _blackFigures;
@@ -24,11 +25,16 @@ class Board_t : public sf::Drawable {
     float _figureRadius;
 
     void SetUpTextures();
-    void SetUpFigures();
+    void SetUpFiguresGameStart();
+    void SetUpFiguresCopy(const std::vector<std::shared_ptr<Figure_t>>& white,
+                          const std::vector<std::shared_ptr<Figure_t>>& black);
     void SetUpTiles();
 
 public:
     Board_t(float windowsSize, float borderWidth);
+    Board_t(const Board_t& second);
+    const Board_t& operator=(const Board_t& second);
+
     bool CheckLoseConditions(Team_e player);
     void MoveFigure(pamsi::Move_t move);
     void ChangePieceToKing(std::shared_ptr<Figure_t> figure);

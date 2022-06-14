@@ -6,6 +6,27 @@
 
 namespace pamsi {
 
+Board_t::Board_t(const Board_t& second)
+{
+    SetUpTiles();
+    SetUpTextures();
+    SetUpFiguresCopy(second._whiteFigures, second._blackFigures);
+}
+
+const Board_t& Board_t::operator=(const Board_t& second)
+{
+    if(&second == this)
+        return *this;
+
+    _tiles.clear();
+    _whiteFigures.clear();
+    _blackFigures.clear();
+    SetUpTiles();
+    SetUpFiguresCopy(second._whiteFigures, second._blackFigures);
+
+    return *this;
+}
+
 pamsi::Tile_t& Board_t::operator()(uint8_t x, uint8_t y) { return _tiles.at(x).at(y); }
 
 void Board_t::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -105,10 +126,51 @@ Board_t::Board_t(float windowsSize, float borderWidth)
 {
     SetUpTiles();
     SetUpTextures();
-    SetUpFigures();
+    SetUpFiguresGameStart();
 }
 
-void Board_t::SetUpFigures()
+void Board_t::SetUpFiguresCopy(const std::vector<std::shared_ptr<Figure_t>>& white,
+                               const std::vector<std::shared_ptr<Figure_t>>& black)
+{
+    for(const std::shared_ptr<Figure_t>& whiteFigure : white) {
+        // Configure piece
+        std::shared_ptr<Figure_t> temp;
+        if(whiteFigure->GetWhoAmI() == Figure_t::WhoAmI::Piece) {
+            temp = std::make_shared<Piece_t>(_figureRadius);
+            temp->SetTexture(_whitePiece);
+        }
+        else if(whiteFigure->GetWhoAmI() == Figure_t::WhoAmI::King) {
+            temp = std::make_shared<King_t>(_figureRadius);
+            temp->SetTexture(_whiteKing);
+        }
+        temp->SetBoard(this);
+        temp->SetCoordinates(whiteFigure->GetCoordinates());
+        temp->SetTeam(Team_e::white);
+        _whiteFigures.emplace_back(temp);
+        // add piece into tile array
+        _tiles[whiteFigure->GetCoordinates().x][whiteFigure->GetCoordinates().y].SetFigure(temp);
+    }
+    for(const std::shared_ptr<Figure_t>& blackFigure : black) {
+        // Configure piece
+        std::shared_ptr<Figure_t> temp;
+        if(blackFigure->GetWhoAmI() == Figure_t::WhoAmI::Piece) {
+            temp = std::make_shared<Piece_t>(_figureRadius);
+            temp->SetTexture(_blackPiece);
+        }
+        else if(blackFigure->GetWhoAmI() == Figure_t::WhoAmI::King) {
+            temp = std::make_shared<King_t>(_figureRadius);
+            temp->SetTexture(_blackKing);
+        }
+        temp->SetBoard(this);
+        temp->SetCoordinates(blackFigure->GetCoordinates());
+        temp->SetTeam(Team_e::black);
+        _blackFigures.emplace_back(temp);
+        // add piece into tile array
+        _tiles[blackFigure->GetCoordinates().x][blackFigure->GetCoordinates().y].SetFigure(temp);
+    }
+}
+
+void Board_t::SetUpFiguresGameStart()
 {
     for(size_t x = 0; x < 8; x++) {
         for(size_t y = 5; y < 8; y++) {
