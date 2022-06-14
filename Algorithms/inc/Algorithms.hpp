@@ -1,7 +1,9 @@
 #ifndef ALGORITHMS_PAMSI_PROJECT_DEFINE_H
 #define ALGORITHMS_PAMSI_PROJECT_DEFINE_H
 
+#include "board.hpp"
 #include "move.hpp"
+
 
 namespace pamsi::algorithms {
 
@@ -29,6 +31,8 @@ Move_t PlayerConsole(const std::vector<Move_t>& allMoves);
 
 Move_t PlayerMouse(const std::vector<Move_t>& allMoves, std::queue<sf::Vector2u>& mouseQueue,
                    bool& reading, std::mutex& queueMutex);
+
+std::vector<pamsi::Board_t> GetAllChildrenOfBoard(const pamsi::Board_t& father);
 
 } // namespace pamsi::algorithms
 

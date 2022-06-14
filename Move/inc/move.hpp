@@ -26,7 +26,7 @@ public:
 
     void SetSource(sf::Vector2u source) { _source = source; }
     void SetDestination(sf::Vector2u dest) { _destination = dest; }
-    void SetAttacked(std::shared_ptr<Figure_t> atck) { _target = atck; }
+    void SetTarget(std::shared_ptr<Figure_t> atck) { _target = atck; }
 
     bool operator==(const Move_t& move)
     {

@@ -1,4 +1,5 @@
 #include "game.hpp"
+#include "Algorithms.hpp"
 #include "move.hpp"
 #include <chrono>
 #include <iostream>
@@ -17,6 +18,15 @@ void Game(pamsi::Board_t& board, std::mutex& mtx,
     static std::shared_ptr<Figure_t> lastMovedFigure = nullptr;
     pamsi::Team_e whoseTurn = pamsi::Team_e::white;
     bool figureTaken = false;
+
+
+    std::vector<pamsi::Board_t> childrens = algorithms::GetAllChildrenOfBoard(board);
+    for(auto child : childrens) {
+        mtx.lock();
+        board = child;
+        mtx.unlock();
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
 
     getchar();
     while(true) {

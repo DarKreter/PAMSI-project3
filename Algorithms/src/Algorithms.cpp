@@ -1,4 +1,5 @@
 #include "Algorithms.hpp"
+#include "Board.hpp"
 #include <iostream>
 #include <iterator>
 #include <queue>
@@ -97,6 +98,28 @@ Move_t PlayerMouse([[maybe_unused]] const std::vector<pamsi::Move_t>& allMoves,
 
     reading = false;
     return *result;
+}
+
+std::vector<pamsi::Board_t> GetAllChildrenOfBoard(const pamsi::Board_t& father)
+{
+    std::vector<pamsi::Board_t> childrens;
+    Board_t dupa = father;
+    // dupa(1,1)
+    dupa._blackFigures.erase(
+        std::remove(dupa._blackFigures.begin(), dupa._blackFigures.end(), dupa(1, 0).GetFigure()),
+        dupa._blackFigures.end());
+
+    childrens.emplace_back(dupa);
+
+    dupa = father;
+    // dupa(1,1)
+    dupa._blackFigures.erase(
+        std::remove(dupa._blackFigures.begin(), dupa._blackFigures.end(), dupa(3, 0).GetFigure()),
+        dupa._blackFigures.end());
+
+    childrens.emplace_back(dupa);
+
+    return childrens;
 }
 
 } // namespace pamsi::algorithms
