@@ -8,7 +8,7 @@ namespace pamsi {
 class Piece_t : public pamsi::Figure_t {
 
 public:
-    Piece_t(float radius) : Figure_t(radius){};
+    Piece_t(float radius) : Figure_t(radius, Figure_t::WhoAmI::Piece){};
 
     std::vector<pamsi::Move_t> GetNormalMoves() override;
     std::vector<pamsi::Move_t> GetAttackMoves() override;

@@ -8,7 +8,7 @@ namespace pamsi {
 class King_t : public pamsi::Figure_t {
 
 public:
-    King_t(float radius) : Figure_t(radius){};
+    King_t(float radius) : Figure_t(radius, Figure_t::WhoAmI::King){};
 
     std::vector<pamsi::Move_t> GetNormalMoves() override;
     std::vector<pamsi::Move_t> GetAttackMoves() override;

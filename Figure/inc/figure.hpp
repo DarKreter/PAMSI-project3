@@ -15,7 +15,7 @@ enum class Team_e
 };
 
 class Figure_t : public sf::Drawable, public sf::Transformable {
-protected:
+public:
     sf::CircleShape _shape;
     sf::Vector2u _coord;
     Team_e _team;
@@ -23,8 +23,14 @@ protected:
 
     void SetPosition(sf::Vector2f position);
 
+    enum class WhoAmI
+    {
+        Piece,
+        King
+    } _whoAmI;
+
 public:
-    Figure_t(float radius) : _shape(radius), _myBoard{NULL} {};
+    Figure_t(float radius, WhoAmI whoAmI) : _shape(radius), _myBoard{NULL}, _whoAmI{whoAmI} {};
 
     void SetTexture(sf::Texture& texture);
     void SetCoordinates(sf::Vector2u coord);

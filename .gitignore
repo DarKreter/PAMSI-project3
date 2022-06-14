@@ -1,4 +1,5 @@
 build*
+myBuild
 .vscode
 .idea
 cmake-build-debug

@@ -14,6 +14,7 @@ constexpr size_t borderWidth = 5.f;
 int main()
 {
     pamsi::Board_t board(windowsSize, borderWidth);
+
     std::queue<sf::Vector2u> mouseQueue;
     bool reading = false;
     std::mutex mtx, queueMutex;
