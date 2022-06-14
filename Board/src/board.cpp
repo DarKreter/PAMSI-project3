@@ -111,36 +111,36 @@ Board_t::Board_t(float windowsSize, float borderWidth)
 void Board_t::SetUpFigures()
 {
     for(size_t x = 0; x < 8; x++) {
-        for(size_t y = 5; y < 8; y++) {
-            if(x % 2 != y % 2) {
-                // Configure piece
-                auto temp = std::make_shared<Piece_t>(_figureRadius);
-                temp->SetBoard(this);
-                temp->SetTexture(_whitePiece);
-                temp->SetCoordinates(sf::Vector2u(x, y));
-                temp->SetTeam(Team_e::white);
-                _whiteFigures.emplace_back(temp);
-                // add piece into tile array
-                _tiles[x][y].SetFigure(temp);
-            }
-        }
-    }
-    for(size_t x = 0; x < 8; x++) {
-        for(size_t y = 0; y < 3; y++) {
+    for(size_t y = 5; y < 8; y++) {
+        if(x % 2 != y % 2) {
+            // Configure piece
             auto temp = std::make_shared<Piece_t>(_figureRadius);
-
-            if(x % 2 != y % 2) {
-                // configure piece
-                temp->SetBoard(this);
-                temp->SetTexture(_blackPiece);
-                temp->SetCoordinates(sf::Vector2u(x, y));
-                temp->SetTeam(Team_e::black);
-                _blackFigures.emplace_back(temp);
-                // add piece into tile array
-                _tiles[x][y].SetFigure(temp);
-            }
+            temp->SetBoard(this);
+            temp->SetTexture(_whitePiece);
+            temp->SetCoordinates(sf::Vector2u(x, y));
+            temp->SetTeam(Team_e::white);
+            _whiteFigures.emplace_back(temp);
+            // add piece into tile array
+            _tiles[x][y].SetFigure(temp);
         }
     }
+}
+for(size_t x = 0; x < 8; x++) {
+    for(size_t y = 0; y < 3; y++) {
+
+        if(x % 2 != y % 2) {
+            auto temp = std::make_shared<Piece_t>(_figureRadius);
+            // configure piece
+            temp->SetBoard(this);
+            temp->SetTexture(_blackPiece);
+            temp->SetCoordinates(sf::Vector2u(x, y));
+            temp->SetTeam(Team_e::black);
+            _blackFigures.emplace_back(temp);
+            // add piece into tile array
+            _tiles[x][y].SetFigure(temp);
+        }
+    }
+}
 }
 
 void Board_t::SetUpTiles()
