@@ -48,13 +48,14 @@ std::vector<pamsi::Move_t> King_t::GetAttackMoves()
     for(auto& option : options) {
         try {
             auto backupOption = option;
+            figure = nullptr;
             while(figure == nullptr) {
                 figure = (*_myBoard)(_coord.x + option.x, _coord.y + option.y).GetFigure();
                 option += backupOption;
             }
             // If its from my team, then no strikes this way
             if(figure->GetTeam() == _team)
-                return moves;
+                continue;
             auto target = figure;
             // opponent trigerred
             do {
