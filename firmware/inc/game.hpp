@@ -6,9 +6,12 @@
 
 namespace pamsi {
 
-void Game(pamsi::Board_t& board, std::mutex& mtx);
-void sfmlLoop(pamsi::Board_t& board, std::mutex& mtx);
-Move_t GetValidMoveFromPlayer(std::vector<Move_t>& allMoves);
+void Game(pamsi::Board_t& board, std::mutex& mtx,
+          std::function<pamsi::Move_t(std::vector<Move_t>)> whiteMove,
+          std::function<pamsi::Move_t(std::vector<Move_t>)> blackMove);
+void sfmlLoop(pamsi::Board_t& board, std::mutex& mtx, std::queue<sf::Vector2u>& mouseQueue,
+              bool& reading, std::mutex& queueMutex);
+
 } // namespace pamsi
 
 #endif // GAME_PAMSI_PROJECT_DEFINE_H

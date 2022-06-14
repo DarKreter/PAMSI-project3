@@ -2,29 +2,16 @@
 #include "move.hpp"
 #include <chrono>
 #include <iostream>
+#include <queue>
 #include <thread>
 
-#include <iterator>
-#include <random>
-
-template <typename Iter, typename RandomGenerator>
-Iter select_randomly(Iter start, Iter end, RandomGenerator& g)
-{
-    std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
-    std::advance(start, dis(g));
-    return start;
-}
-
-template <typename Iter>
-Iter select_randomly(Iter start, Iter end)
-{
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    return select_randomly(start, end, gen);
-}
+constexpr size_t windowsSize = 1000;
+constexpr size_t borderWidth = 5.f;
 
 namespace pamsi {
-void Game(pamsi::Board_t& board, std::mutex& mtx)
+void Game(pamsi::Board_t& board, std::mutex& mtx,
+          std::function<pamsi::Move_t(std::vector<Move_t>)> whiteMove,
+          std::function<pamsi::Move_t(std::vector<Move_t>)> blackMove)
 {
     // white always starts
     static std::shared_ptr<Figure_t> lastMovedFigure = nullptr;
@@ -50,7 +37,7 @@ void Game(pamsi::Board_t& board, std::mutex& mtx)
         if(!figureTaken)
             allMoves = std::move(board.GetAllPossibleMoves(whoseTurn, figureTaken));
         else
-            allMoves = lastMovedFigure->GetAttackMoves();
+            allMoves = std::move(lastMovedFigure->GetAttackMoves());
 
         // DEBUG
         for(auto& move : allMoves) {
@@ -75,11 +62,13 @@ void Game(pamsi::Board_t& board, std::mutex& mtx)
         // He has move
         else {
             // Get valid move from player
-            // playerMove = GetValidMoveFromPlayer(allMoves);
-            // playerMove = *(std::end(allMoves) - 1);
-            playerMove = *select_randomly(allMoves.begin(), allMoves.end());
+            if(whoseTurn == pamsi::Team_e::white)
+                playerMove = whiteMove(allMoves);
+            else if(whoseTurn == pamsi::Team_e::black)
+                playerMove = blackMove(allMoves);
+
             // getchar();
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
             // Move
             mtx.lock();
@@ -115,43 +104,17 @@ void Game(pamsi::Board_t& board, std::mutex& mtx)
     }
 }
 
-void NormalMove() {}
-
-Move_t GetValidMoveFromPlayer(std::vector<Move_t>& allMoves)
+sf::Vector2u GetPressedTileCoord(sf::Vector2u mouse, sf::Vector2u size)
 {
-    sf::Vector2u source, dest;
-    std::vector<Move_t>::iterator result;
-    Move_t myMove(source, dest);
-    do {
+    size_t x = (float(mouse.x) / float(size.x)) * 8.f;
+    size_t y = (float(mouse.y) / float(size.y)) * 8.f;
 
-        // Get move from player
-        std::cin >> source.x >> source.y;
-        std::cin >> dest.x >> dest.y;
-
-        myMove.SetSource(source);
-        myMove.SetDestination(dest);
-        // Check if it's valid
-        result =
-            std::find_if(std::begin(allMoves), std::end(allMoves), [&myMove](auto& currentMove) {
-                if(myMove == currentMove)
-                    return true;
-                return false;
-            });
-
-        if(result == std::end(allMoves))
-            std::cout << "Invalid move!" << std::endl;
-
-    } while(result == std::end(allMoves));
-
-    std::cout << "Valid move!" << std::endl;
-
-    return *result;
+    // std::cout << x << "," << y << std::endl;
+    return sf::Vector2u(x, y);
 }
 
-constexpr size_t windowsSize = 1000;
-constexpr size_t borderWidth = 5.f;
-
-void sfmlLoop(pamsi::Board_t& board, std::mutex& mtx)
+void sfmlLoop(pamsi::Board_t& board, std::mutex& mtx, std::queue<sf::Vector2u>& mouseQueue,
+              bool& reading, std::mutex& queueMutex)
 {
     sf::RenderWindow window(sf::VideoMode(windowsSize, windowsSize), "Checkers!",
                             sf::Style::Default);
@@ -167,6 +130,19 @@ void sfmlLoop(pamsi::Board_t& board, std::mutex& mtx)
             // "close requested" event: we close the window
             if(event.type == sf::Event::Closed)
                 window.close();
+            else if(event.type == sf::Event::MouseButtonPressed) {
+                if(event.mouseButton.button == sf::Mouse::Left && reading) {
+                    auto tile = GetPressedTileCoord(
+                        sf::Vector2u(event.mouseButton.x, event.mouseButton.y), window.getSize());
+
+                    queueMutex.lock();
+                    if(mouseQueue.size() == 10)
+                        mouseQueue.pop();
+
+                    mouseQueue.push(tile);
+                    queueMutex.unlock();
+                }
+            }
         }
 
         // clear the window with black color
