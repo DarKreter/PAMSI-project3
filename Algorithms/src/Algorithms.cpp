@@ -225,6 +225,76 @@ int CountFigures(const Board_t& board, Team_e who)
     else
         return board.GetBlackFigures().size() - board.GetWhiteFigures().size();
 }
+
+int CountFiguresWithKing(const Board_t& board, Team_e who)
+{
+    int whiteSum = 0, blackSum = 0;
+
+    for(auto& figure : board.GetWhiteFigures())
+        switch(figure->GetWhoAmI()) {
+        case Figure_t::WhoAmI::Piece:
+            whiteSum++;
+            break;
+        case Figure_t::WhoAmI::King:
+            whiteSum += 4;
+            break;
+        default:
+            break;
+        }
+
+    for(auto& figure : board.GetBlackFigures())
+        switch(figure->GetWhoAmI()) {
+        case Figure_t::WhoAmI::Piece:
+            blackSum++;
+            break;
+        case Figure_t::WhoAmI::King:
+            blackSum += 4;
+            break;
+        default:
+            break;
+        }
+
+    if(who == Team_e::white)
+        return whiteSum - blackSum;
+    else
+        return blackSum - whiteSum;
+}
+
+int ValuePosition(const Board_t& board, Team_e who)
+{
+    int whiteSum = 0, blackSum = 0;
+    int temp;
+    for(auto& figure : board.GetWhiteFigures())
+        switch(figure->GetWhoAmI()) {
+        case Figure_t::WhoAmI::Piece:
+            temp = std::abs(8l - figure->GetCoordinates().y);
+            whiteSum += temp;
+            break;
+        case Figure_t::WhoAmI::King:
+            whiteSum += 12;
+            break;
+        default:
+            break;
+        }
+
+    for(auto& figure : board.GetBlackFigures())
+        switch(figure->GetWhoAmI()) {
+        case Figure_t::WhoAmI::Piece:
+            temp = figure->GetCoordinates().y;
+            blackSum += temp;
+            break;
+        case Figure_t::WhoAmI::King:
+            blackSum += 12;
+            break;
+        default:
+            break;
+        }
+
+    if(who == Team_e::white)
+        return whiteSum - blackSum;
+    else
+        return blackSum - whiteSum;
+}
 } // namespace BR
 
 } // namespace pamsi::algorithms

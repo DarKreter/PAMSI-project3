@@ -44,7 +44,9 @@ std::pair<int, Move_t*> MinMax(Board_t board, size_t depth, int alpha, int beta,
 
 namespace BR {
 int CountFigures(const Board_t& board, Team_e who);
-}
+int CountFiguresWithKing(const Board_t& board, Team_e who);
+int ValuePosition(const Board_t& board, Team_e who);
+} // namespace BR
 
 } // namespace pamsi::algorithms
 

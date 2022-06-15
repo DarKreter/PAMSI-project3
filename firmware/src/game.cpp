@@ -66,7 +66,8 @@ void Game(pamsi::Board_t& board, function whiteMove, function blackMove)
             }
 
             // Move
-            // std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            if(whoseTurn == Team_e::black)
+                std::this_thread::sleep_for(std::chrono::milliseconds(700));
             board.lock();
             board.MoveFigure(playerMove);
             board.unlock();
