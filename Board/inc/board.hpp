@@ -31,6 +31,7 @@ protected:
     void SetUpFiguresGameStart();
     void SetUpFiguresCopy(const Board_t& second);
     void SetUpTiles();
+    void SetUpTilesCopy();
 
 public:
     Board_t(float windowsSize, float borderWidth);
@@ -49,6 +50,14 @@ public:
     float GetFigureRadius() const { return _figureRadius; }
     std::vector<Move_t> GetAllPossibleMoves(Team_e player, bool figureAlreadyTaken) const;
     pamsi::Tile_t& operator()(uint8_t x, uint8_t y);
+    const std::vector<std::shared_ptr<pamsi::Figure_t>>& GetWhiteFigures() const
+    {
+        return _whiteFigures;
+    }
+    const std::vector<std::shared_ptr<pamsi::Figure_t>>& GetBlackFigures() const
+    {
+        return _blackFigures;
+    }
 
 private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;

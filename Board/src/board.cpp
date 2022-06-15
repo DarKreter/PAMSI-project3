@@ -8,8 +8,7 @@ namespace pamsi {
 
 Board_t::Board_t(const Board_t& second)
 {
-    SetUpTiles();
-    SetUpTextures();
+    SetUpTilesCopy();
     SetUpFiguresCopy(second);
 }
 
@@ -205,6 +204,16 @@ void Board_t::SetUpFiguresGameStart()
             }
         }
     }
+    // int x = 2, y = 1;
+    // auto temp = std::make_shared<Piece_t>(_figureRadius);
+    // // configure piece
+    // temp->SetBoard(this);
+    // temp->SetTexture(_blackPiece);
+    // temp->SetCoordinates(sf::Vector2u(x, y));
+    // temp->SetTeam(Team_e::black);
+    // _blackFigures.emplace_back(temp);
+    // // add piece into tile array
+    // _tiles[x][y].SetFigure(temp);
 }
 
 void Board_t::SetUpTiles()
@@ -223,6 +232,21 @@ void Board_t::SetUpTiles()
                 temp.SetColor(fillColor_2);
             temp.SetBorderWidth(_borderWidth);
             temp.SetOutlineColor(outlineColor);
+            temp.SetPosition(sf::Vector2f(x * _tileLength, y * _tileLength));
+            tempVector.emplace_back(temp);
+        }
+        _tiles.emplace_back(tempVector);
+    }
+}
+
+void Board_t::SetUpTilesCopy()
+{
+    // Setup tiles
+    for(size_t x = 0; x < 8; x++) {
+        std::vector<pamsi::Tile_t> tempVector;
+        for(size_t y = 0; y < 8; y++) {
+
+            pamsi::Tile_t temp(sf::Vector2f(_tileLength, _tileLength));
             temp.SetPosition(sf::Vector2f(x * _tileLength, y * _tileLength));
             tempVector.emplace_back(temp);
         }

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <queue>
 #include <thread>
+#include <unistd.h>
 
 constexpr size_t windowsSize = 1000;
 constexpr size_t borderWidth = 5.f;
@@ -19,6 +20,13 @@ void Game(pamsi::Board_t& board, std::function<pamsi::Move_t(std::vector<Move_t>
     bool figureTaken = false;
 
     while(true) {
+        auto start = std::chrono::steady_clock::now();
+        int minmax = algorithms::MinMax(board, 1, INT_MIN, INT_MAX, whoseTurn, Team_e::white);
+        auto end = std::chrono::steady_clock::now();
+        std::cout << "MinMax: " << minmax << std::endl;
+        std::cout << "Minmax time in milliseconds: "
+                  << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
+                  << " ms" << std::endl;
 
         // Check lose conditions
         if(!figureTaken && board.CheckLoseConditions(whoseTurn)) {

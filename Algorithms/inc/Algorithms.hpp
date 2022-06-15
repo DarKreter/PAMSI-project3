@@ -31,9 +31,16 @@ Move_t PlayerConsole(const std::vector<Move_t>& allMoves);
 Move_t PlayerMouse(const std::vector<Move_t>& allMoves, std::queue<sf::Vector2u>& mouseQueue,
                    bool& reading, std::mutex& queueMutex);
 
-std::vector<pamsi::Board_t>
-GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e whoseTurn, bool figureTaken = false,
-                      std::shared_ptr<Figure_t> lastMovedFigure = nullptr);
+void GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e whoseTurn,
+                           std::vector<pamsi::Board_t>& childrens, bool figureTaken = false,
+                           std::shared_ptr<Figure_t> lastMovedFigure = nullptr);
+
+int MinMax(Board_t board, size_t depth, int alpha, int beta, Team_e whoseTurn,
+           Team_e maximizingPlayer);
+
+namespace BR {
+int CountFigures(const Board_t& board);
+}
 
 } // namespace pamsi::algorithms
 
