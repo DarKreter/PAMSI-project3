@@ -18,17 +18,6 @@ void Game(pamsi::Board_t& board, std::function<pamsi::Move_t(std::vector<Move_t>
     pamsi::Team_e whoseTurn = pamsi::Team_e::white;
     bool figureTaken = false;
 
-    Board_t backup = board;
-    std::vector<pamsi::Board_t> childrens =
-        algorithms::GetAllChildrenOfBoard(board, whoseTurn, figureTaken);
-    for(auto child : childrens) {
-        board.lock();
-        board = child;
-        board.unlock();
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-    }
-    board = backup;
-    getchar();
     while(true) {
 
         // Check lose conditions
@@ -76,9 +65,6 @@ void Game(pamsi::Board_t& board, std::function<pamsi::Move_t(std::vector<Move_t>
                 playerMove = whiteMove(allMoves);
             else if(whoseTurn == pamsi::Team_e::black)
                 playerMove = blackMove(allMoves);
-
-            // getchar();
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
             // Move
             board.lock();

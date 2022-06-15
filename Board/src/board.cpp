@@ -77,6 +77,8 @@ void Board_t::MoveFigure(pamsi::Move_t move)
     _tiles[move.GetDestination().x][move.GetDestination().y].SetFigure(f);
 
     // If it was attack, remove taken guy
+    if(move.GetTaken() == nullptr)
+        return;
     if(auto destroyedFigure = this->operator()(move.GetTaken()->GetCoordinates().x,
                                                move.GetTaken()->GetCoordinates().y)
                                   .GetFigure()) {
@@ -188,23 +190,21 @@ void Board_t::SetUpFiguresGameStart()
             }
         }
     }
-    // for(size_t x = 0; x < 8; x++) {
-    //     for(size_t y = 0; y < 3; y++) {
-
-    //         if(x % 2 != y % 2) {
-    size_t x = 3, y = 4;
-    auto temp = std::make_shared<Piece_t>(_figureRadius);
-    // configure piece
-    temp->SetBoard(this);
-    temp->SetTexture(_blackPiece);
-    temp->SetCoordinates(sf::Vector2u(x, y));
-    temp->SetTeam(Team_e::black);
-    _blackFigures.emplace_back(temp);
-    // add piece into tile array
-    _tiles[x][y].SetFigure(temp);
-    //         }
-    //     }
-    // }
+    for(size_t x = 0; x < 8; x++) {
+        for(size_t y = 0; y < 3; y++) {
+            if(x % 2 != y % 2) {
+                auto temp = std::make_shared<Piece_t>(_figureRadius);
+                // configure piece
+                temp->SetBoard(this);
+                temp->SetTexture(_blackPiece);
+                temp->SetCoordinates(sf::Vector2u(x, y));
+                temp->SetTeam(Team_e::black);
+                _blackFigures.emplace_back(temp);
+                // add piece into tile array
+                _tiles[x][y].SetFigure(temp);
+            }
+        }
+    }
 }
 
 void Board_t::SetUpTiles()

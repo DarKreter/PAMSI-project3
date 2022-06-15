@@ -12,11 +12,13 @@ namespace pamsi::algorithms {
 
 pamsi::Move_t Random(const std::vector<pamsi::Move_t>& allMoves)
 {
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     return *select_randomly(allMoves.begin(), allMoves.end());
 }
 
 pamsi::Move_t LastAvailableMove(const std::vector<pamsi::Move_t>& allMoves)
 {
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     return *(std::end(allMoves) - 1);
 }
 
@@ -101,28 +103,38 @@ Move_t PlayerMouse([[maybe_unused]] const std::vector<pamsi::Move_t>& allMoves,
 }
 
 std::vector<pamsi::Board_t> GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e whoseTurn,
-                                                  bool figureTaken)
+                                                  bool figureTaken,
+                                                  std::shared_ptr<Figure_t> lastMovedFigure)
 {
     std::vector<pamsi::Board_t> childrens;
     // Get all possible moves for current player
     std::vector<Move_t> allMoves;
-    // if(!figureTaken)
-    allMoves = std::move(father.GetAllPossibleMoves(whoseTurn, figureTaken));
-    // else
-    //     allMoves = std::move(lastMovedFigure->GetAttackMoves());
+    if(!figureTaken)
+        allMoves = std::move(father.GetAllPossibleMoves(whoseTurn, figureTaken));
+    else {
+        auto trulyLastMovedFigure =
+            father(lastMovedFigure->GetCoordinates().x, lastMovedFigure->GetCoordinates().y)
+                .GetFigure();
 
+        allMoves = std::move(trulyLastMovedFigure->GetAttackMoves());
+    }
     for(Move_t& move : allMoves) {
         father.lock();
         Board_t temp = father;
         temp.MoveFigure(move);
-
-        for(std::shared_ptr<Figure_t> figure : temp._blackFigures)
-            std::cout << figure << std::endl;
-
-        std::cout << std::endl;
-
         father.unlock();
-        childrens.emplace_back(temp);
+
+        if(move.GetTaken() != nullptr) {
+            std::vector<pamsi::Board_t> secondChildrens = GetAllChildrenOfBoard(
+                temp, whoseTurn, true,
+                temp(move.GetDestination().x, move.GetDestination().y).GetFigure());
+            if(secondChildrens.empty())
+                childrens.emplace_back(temp);
+            else
+                childrens.insert(childrens.end(), secondChildrens.begin(), secondChildrens.end());
+        }
+        else
+            childrens.emplace_back(temp);
     }
 
     return childrens;

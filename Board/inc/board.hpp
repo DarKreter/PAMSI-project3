@@ -14,7 +14,7 @@
 
 namespace pamsi {
 class Board_t : public sf::Drawable {
-public:
+protected:
     std::vector<std::vector<pamsi::Tile_t>> _tiles;
     std::vector<std::shared_ptr<Figure_t>> _whiteFigures;
     std::vector<std::shared_ptr<Figure_t>> _blackFigures;
