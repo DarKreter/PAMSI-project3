@@ -2,8 +2,9 @@
 #define MOVE_PAMSI_PROJECT_DEFINE_H
 
 #include <SFML/Graphics.hpp>
-#include <memory>
 #include <bits/stdc++.h>
+#include <memory>
+
 
 namespace pamsi {
 

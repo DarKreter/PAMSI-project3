@@ -5,6 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include <Tile.hpp>
 #include <memory>
+#include <mutex>
 #include <vector>
 
 #define fillColor_1 sf::Color::Red
@@ -24,16 +25,20 @@ public:
     float _tileLength;
     float _figureRadius;
 
+    std::mutex mtx;
+
     void SetUpTextures();
     void SetUpFiguresGameStart();
-    void SetUpFiguresCopy(const std::vector<std::shared_ptr<Figure_t>>& white,
-                          const std::vector<std::shared_ptr<Figure_t>>& black);
+    void SetUpFiguresCopy(const Board_t& second);
     void SetUpTiles();
 
 public:
     Board_t(float windowsSize, float borderWidth);
     Board_t(const Board_t& second);
     const Board_t& operator=(const Board_t& second);
+
+    void lock() { mtx.lock(); }
+    void unlock() { mtx.unlock(); }
 
     bool CheckLoseConditions(Team_e player);
     void MoveFigure(pamsi::Move_t move);

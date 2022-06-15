@@ -10,7 +10,7 @@ Board_t::Board_t(const Board_t& second)
 {
     SetUpTiles();
     SetUpTextures();
-    SetUpFiguresCopy(second._whiteFigures, second._blackFigures);
+    SetUpFiguresCopy(second);
 }
 
 const Board_t& Board_t::operator=(const Board_t& second)
@@ -22,7 +22,7 @@ const Board_t& Board_t::operator=(const Board_t& second)
     _whiteFigures.clear();
     _blackFigures.clear();
     SetUpTiles();
-    SetUpFiguresCopy(second._whiteFigures, second._blackFigures);
+    SetUpFiguresCopy(second);
 
     return *this;
 }
@@ -77,7 +77,9 @@ void Board_t::MoveFigure(pamsi::Move_t move)
     _tiles[move.GetDestination().x][move.GetDestination().y].SetFigure(f);
 
     // If it was attack, remove taken guy
-    if(auto destroyedFigure = move.GetTaken()) {
+    if(auto destroyedFigure = this->operator()(move.GetTaken()->GetCoordinates().x,
+                                               move.GetTaken()->GetCoordinates().y)
+                                  .GetFigure()) {
         // remove from proper container
         if(f->GetTeam() == Team_e::white)
             _blackFigures.erase(
@@ -129,10 +131,9 @@ Board_t::Board_t(float windowsSize, float borderWidth)
     SetUpFiguresGameStart();
 }
 
-void Board_t::SetUpFiguresCopy(const std::vector<std::shared_ptr<Figure_t>>& white,
-                               const std::vector<std::shared_ptr<Figure_t>>& black)
+void Board_t::SetUpFiguresCopy(const Board_t& second)
 {
-    for(const std::shared_ptr<Figure_t>& whiteFigure : white) {
+    for(const std::shared_ptr<Figure_t>& whiteFigure : second._whiteFigures) {
         // Configure piece
         std::shared_ptr<Figure_t> temp;
         if(whiteFigure->GetWhoAmI() == Figure_t::WhoAmI::Piece) {
@@ -150,7 +151,7 @@ void Board_t::SetUpFiguresCopy(const std::vector<std::shared_ptr<Figure_t>>& whi
         // add piece into tile array
         _tiles[whiteFigure->GetCoordinates().x][whiteFigure->GetCoordinates().y].SetFigure(temp);
     }
-    for(const std::shared_ptr<Figure_t>& blackFigure : black) {
+    for(const std::shared_ptr<Figure_t>& blackFigure : second._blackFigures) {
         // Configure piece
         std::shared_ptr<Figure_t> temp;
         if(blackFigure->GetWhoAmI() == Figure_t::WhoAmI::Piece) {
@@ -187,22 +188,23 @@ void Board_t::SetUpFiguresGameStart()
             }
         }
     }
-    for(size_t x = 0; x < 8; x++) {
-        for(size_t y = 0; y < 3; y++) {
+    // for(size_t x = 0; x < 8; x++) {
+    //     for(size_t y = 0; y < 3; y++) {
 
-            if(x % 2 != y % 2) {
-                auto temp = std::make_shared<Piece_t>(_figureRadius);
-                // configure piece
-                temp->SetBoard(this);
-                temp->SetTexture(_blackPiece);
-                temp->SetCoordinates(sf::Vector2u(x, y));
-                temp->SetTeam(Team_e::black);
-                _blackFigures.emplace_back(temp);
-                // add piece into tile array
-                _tiles[x][y].SetFigure(temp);
-            }
-        }
-    }
+    //         if(x % 2 != y % 2) {
+    size_t x = 3, y = 4;
+    auto temp = std::make_shared<Piece_t>(_figureRadius);
+    // configure piece
+    temp->SetBoard(this);
+    temp->SetTexture(_blackPiece);
+    temp->SetCoordinates(sf::Vector2u(x, y));
+    temp->SetTeam(Team_e::black);
+    _blackFigures.emplace_back(temp);
+    // add piece into tile array
+    _tiles[x][y].SetFigure(temp);
+    //         }
+    //     }
+    // }
 }
 
 void Board_t::SetUpTiles()

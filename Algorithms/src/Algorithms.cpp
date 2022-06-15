@@ -100,7 +100,8 @@ Move_t PlayerMouse([[maybe_unused]] const std::vector<pamsi::Move_t>& allMoves,
     return *result;
 }
 
-std::vector<pamsi::Board_t> GetAllChildrenOfBoard(const pamsi::Board_t& father, Team_e whoseTurn, bool figureTaken, std::mutex& mtx)
+std::vector<pamsi::Board_t> GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e whoseTurn,
+                                                  bool figureTaken)
 {
     std::vector<pamsi::Board_t> childrens;
     // Get all possible moves for current player
@@ -111,16 +112,20 @@ std::vector<pamsi::Board_t> GetAllChildrenOfBoard(const pamsi::Board_t& father, 
     //     allMoves = std::move(lastMovedFigure->GetAttackMoves());
 
     for(Move_t& move : allMoves) {
-        mtx.lock();
+        father.lock();
         Board_t temp = father;
-        mtx.unlock();
         temp.MoveFigure(move);
+
+        for(std::shared_ptr<Figure_t> figure : temp._blackFigures)
+            std::cout << figure << std::endl;
+
+        std::cout << std::endl;
+
+        father.unlock();
         childrens.emplace_back(temp);
     }
 
     return childrens;
 }
-
-
 
 } // namespace pamsi::algorithms

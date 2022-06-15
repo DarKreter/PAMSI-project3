@@ -31,8 +31,8 @@ Move_t PlayerConsole(const std::vector<Move_t>& allMoves);
 Move_t PlayerMouse(const std::vector<Move_t>& allMoves, std::queue<sf::Vector2u>& mouseQueue,
                    bool& reading, std::mutex& queueMutex);
 
-std::vector<pamsi::Board_t> GetAllChildrenOfBoard(const pamsi::Board_t& father, Team_e whoseTurn,
-                                                  bool figureTaken, std::mutex& mtx);
+std::vector<pamsi::Board_t> GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e whoseTurn,
+                                                  bool figureTaken);
 
 } // namespace pamsi::algorithms
 

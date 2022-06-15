@@ -10,8 +10,7 @@ constexpr size_t windowsSize = 1000;
 constexpr size_t borderWidth = 5.f;
 
 namespace pamsi {
-void Game(pamsi::Board_t& board, std::mutex& mtx,
-          std::function<pamsi::Move_t(std::vector<Move_t>)> whiteMove,
+void Game(pamsi::Board_t& board, std::function<pamsi::Move_t(std::vector<Move_t>)> whiteMove,
           std::function<pamsi::Move_t(std::vector<Move_t>)> blackMove)
 {
     // white always starts
@@ -19,15 +18,16 @@ void Game(pamsi::Board_t& board, std::mutex& mtx,
     pamsi::Team_e whoseTurn = pamsi::Team_e::white;
     bool figureTaken = false;
 
+    Board_t backup = board;
     std::vector<pamsi::Board_t> childrens =
-        algorithms::GetAllChildrenOfBoard(board, whoseTurn, figureTaken, mtx);
+        algorithms::GetAllChildrenOfBoard(board, whoseTurn, figureTaken);
     for(auto child : childrens) {
-        mtx.lock();
+        board.lock();
         board = child;
-        mtx.unlock();
+        board.unlock();
         std::this_thread::sleep_for(std::chrono::seconds(2));
     }
-
+    board = backup;
     getchar();
     while(true) {
 
@@ -81,9 +81,9 @@ void Game(pamsi::Board_t& board, std::mutex& mtx,
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
             // Move
-            mtx.lock();
+            board.lock();
             board.MoveFigure(playerMove);
-            mtx.unlock();
+            board.unlock();
 
             lastMovedFigure =
                 board(playerMove.GetDestination().x, playerMove.GetDestination().y).GetFigure();
@@ -123,8 +123,8 @@ sf::Vector2u GetPressedTileCoord(sf::Vector2u mouse, sf::Vector2u size)
     return sf::Vector2u(x, y);
 }
 
-void sfmlLoop(pamsi::Board_t& board, std::mutex& mtx, std::queue<sf::Vector2u>& mouseQueue,
-              bool& reading, std::mutex& queueMutex)
+void sfmlLoop(pamsi::Board_t& board, std::queue<sf::Vector2u>& mouseQueue, bool& reading,
+              std::mutex& queueMutex)
 {
     sf::RenderWindow window(sf::VideoMode(windowsSize, windowsSize), "Checkers!",
                             sf::Style::Default);
@@ -158,9 +158,9 @@ void sfmlLoop(pamsi::Board_t& board, std::mutex& mtx, std::queue<sf::Vector2u>& 
         // clear the window with black color
         window.clear(sf::Color::White);
 
-        mtx.lock();
+        board.lock();
         window.draw(board);
-        mtx.unlock();
+        board.unlock();
         // end the current frame
         window.display();
     }
