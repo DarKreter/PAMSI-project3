@@ -8,17 +8,14 @@
 
 namespace pamsi::algorithms {
 
-// playerMove = GetValidMoveFromPlayer(allMoves);
-
-pamsi::Move_t Random(const std::vector<pamsi::Move_t>& allMoves)
+pamsi::Move_t Random(const std::vector<pamsi::Move_t>& allMoves, [[maybe_unused]] pamsi::Team_e a,
+                     [[maybe_unused]] pamsi::Board_t& board)
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     return *select_randomly(allMoves.begin(), allMoves.end());
 }
 
 pamsi::Move_t LastAvailableMove(const std::vector<pamsi::Move_t>& allMoves)
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     return *(std::end(allMoves) - 1);
 }
 
@@ -102,11 +99,11 @@ Move_t PlayerMouse([[maybe_unused]] const std::vector<pamsi::Move_t>& allMoves,
     return *result;
 }
 
-std::vector<pamsi::Board_t> GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e whoseTurn,
-                                                  bool figureTaken,
-                                                  std::shared_ptr<Figure_t> lastMovedFigure)
+std::vector<std::pair<pamsi::Board_t, pamsi::Move_t>>
+GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e whoseTurn, Move_t firstMoveInSequence,
+                      bool figureTaken, std::shared_ptr<Figure_t> lastMovedFigure)
 {
-    std::vector<pamsi::Board_t> childrens;
+    std::vector<std::pair<pamsi::Board_t, pamsi::Move_t>> childrens;
     // Get all possible moves for current player
     std::vector<Move_t> allMoves;
     if(!figureTaken)
@@ -125,62 +122,108 @@ std::vector<pamsi::Board_t> GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e
         father.unlock();
 
         if(move.GetTaken() != nullptr) {
-            std::vector<pamsi::Board_t> secondChildrens = GetAllChildrenOfBoard(
-                temp, whoseTurn, true,
-                temp(move.GetDestination().x, move.GetDestination().y).GetFigure());
-            if(secondChildrens.empty())
-                childrens.emplace_back(temp);
+
+            std::vector<std::pair<pamsi::Board_t, pamsi::Move_t>> secondChildrens =
+                GetAllChildrenOfBoard(
+                    temp, whoseTurn,
+                    (firstMoveInSequence.GetSource().x == INT_MAX ? move : firstMoveInSequence),
+                    true, temp(move.GetDestination().x, move.GetDestination().y).GetFigure());
+            if(secondChildrens.empty()) {
+                if(firstMoveInSequence.GetSource().x == INT_MAX)
+                    childrens.emplace_back(std::make_pair(temp, move));
+                else
+                    childrens.emplace_back(std::make_pair(temp, firstMoveInSequence));
+            }
             else
                 childrens.insert(childrens.end(), secondChildrens.begin(), secondChildrens.end());
         }
-        else
-            childrens.emplace_back(temp);
+        else {
+            if(firstMoveInSequence.GetSource().x == INT_MAX)
+                childrens.emplace_back(std::make_pair(temp, move));
+            else
+                childrens.emplace_back(std::make_pair(temp, firstMoveInSequence));
+        }
     }
 
     return childrens;
 }
 
-int MinMax(Board_t board, size_t depth, int alpha, int beta, Team_e whoseTurn,
-           Team_e maximizingPlayer)
+std::pair<int, Move_t*> MinMax(Board_t board, size_t depth, int alpha, int beta, Team_e whoseTurn,
+                               Team_e maximizingPlayer, int (*RateBoard)(const Board_t&, Team_e),
+                               bool firstOne)
 {
     if(depth == 0 || board.CheckLoseConditions(whoseTurn))
-        return BR::CountFigures(board);
+        return {RateBoard(board, maximizingPlayer), nullptr};
 
     if(maximizingPlayer == whoseTurn) {
         int max = INT_MIN;
-        auto childrens = GetAllChildrenOfBoard(board, whoseTurn);
-        for(auto& child : childrens) {
+        size_t count = 0;
+        std::vector<int> toChoose;
+        auto childrens = GetAllChildrenOfBoard(board, whoseTurn, Move_t());
+        for(auto& [child, childMove] : childrens) {
             int eval = MinMax(child, depth - 1, alpha, beta,
                               (whoseTurn == Team_e::white ? Team_e::black : Team_e::white),
-                              maximizingPlayer);
+                              maximizingPlayer, RateBoard, false)
+                           .first;
+            if(eval > max) {
+                toChoose.clear();
+                max = eval;
+                toChoose.emplace_back(count);
+            }
+            else if(eval == max)
+                toChoose.emplace_back(count);
             max = std::max(max, eval);
             alpha = std::max(alpha, eval);
+            count++;
             if(beta <= alpha)
                 break;
         }
-        return max;
+        if(firstOne) {
+            int which = *select_randomly(toChoose.begin(), toChoose.end());
+            return {max, new Move_t(childrens[which].second)};
+        }
+
+        return {max, nullptr};
     }
     else {
         int min = INT_MAX;
-        auto childrens = GetAllChildrenOfBoard(board, whoseTurn);
-        for(auto& child : childrens) {
+        size_t count = 0;
+        std::vector<int> toChoose;
+        auto childrens = GetAllChildrenOfBoard(board, whoseTurn, Move_t());
+        for(auto& [child, childMove] : childrens) {
             int eval = MinMax(child, depth - 1, alpha, beta,
                               (whoseTurn == Team_e::white ? Team_e::black : Team_e::white),
-                              maximizingPlayer);
-            min = std::min(min, eval);
+                              maximizingPlayer, RateBoard, false)
+                           .first;
+            if(eval < min) {
+                toChoose.clear();
+                min = eval;
+                toChoose.emplace_back(count);
+            }
+            else if(eval == min)
+                toChoose.emplace_back(count);
             beta = std::min(beta, eval);
+            count++;
             if(beta <= alpha)
                 break;
         }
-        return min;
+        if(firstOne) {
+            int which = *select_randomly(toChoose.begin(), toChoose.end());
+            return {min, new Move_t(childrens[which].second)};
+        }
+
+        return {min, nullptr};
     }
-    return INT_MAX;
+    return {INT_MAX, nullptr};
 }
 
 namespace BR {
-int CountFigures(const Board_t& board)
+int CountFigures(const Board_t& board, Team_e who)
 {
-    return board.GetWhiteFigures().size() - board.GetBlackFigures().size();
+    if(who == Team_e::white)
+        return board.GetWhiteFigures().size() - board.GetBlackFigures().size();
+    else
+        return board.GetBlackFigures().size() - board.GetWhiteFigures().size();
 }
 } // namespace BR
 

@@ -22,7 +22,8 @@ Iter select_randomly(Iter start, Iter end)
     return select_randomly(start, end, gen);
 }
 
-Move_t Random(const std::vector<Move_t>& allMoves);
+Move_t Random(const std::vector<Move_t>& allMoves, [[maybe_unused]] pamsi::Team_e a,
+              [[maybe_unused]] pamsi::Board_t& board);
 
 Move_t LastAvailableMove(const std::vector<Move_t>& allMoves);
 
@@ -31,15 +32,18 @@ Move_t PlayerConsole(const std::vector<Move_t>& allMoves);
 Move_t PlayerMouse(const std::vector<Move_t>& allMoves, std::queue<sf::Vector2u>& mouseQueue,
                    bool& reading, std::mutex& queueMutex);
 
-std::vector<pamsi::Board_t>
-GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e whoseTurn, bool figureTaken = false,
+std::vector<std::pair<pamsi::Board_t, pamsi::Move_t>>
+GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e whoseTurn, Move_t firstMoveInSequence,
+                      bool figureTaken = false,
                       std::shared_ptr<Figure_t> lastMovedFigure = nullptr);
 
-int MinMax(Board_t board, size_t depth, int alpha, int beta, Team_e whoseTurn,
-           Team_e maximizingPlayer);
+std::pair<int, Move_t*> MinMax(Board_t board, size_t depth, int alpha, int beta, Team_e whoseTurn,
+                               Team_e maximizingPlayer,
+                               int (*RateBoard)(const Board_t& board, Team_e),
+                               bool firstOne = true);
 
 namespace BR {
-int CountFigures(const Board_t& board);
+int CountFigures(const Board_t& board, Team_e who);
 }
 
 } // namespace pamsi::algorithms

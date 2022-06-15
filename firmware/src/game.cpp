@@ -1,18 +1,15 @@
 #include "game.hpp"
 #include "Algorithms.hpp"
 #include "move.hpp"
-#include <chrono>
 #include <iostream>
 #include <queue>
 #include <thread>
-#include <unistd.h>
 
 constexpr size_t windowsSize = 1000;
 constexpr size_t borderWidth = 5.f;
 
 namespace pamsi {
-void Game(pamsi::Board_t& board, std::function<pamsi::Move_t(std::vector<Move_t>)> whiteMove,
-          std::function<pamsi::Move_t(std::vector<Move_t>)> blackMove)
+void Game(pamsi::Board_t& board, function whiteMove, function blackMove)
 {
     // white always starts
     static std::shared_ptr<Figure_t> lastMovedFigure = nullptr;
@@ -20,13 +17,6 @@ void Game(pamsi::Board_t& board, std::function<pamsi::Move_t(std::vector<Move_t>
     bool figureTaken = false;
 
     while(true) {
-        auto start = std::chrono::steady_clock::now();
-        int minmax = algorithms::MinMax(board, 5, INT_MIN, INT_MAX, whoseTurn, Team_e::white);
-        auto end = std::chrono::steady_clock::now();
-        std::cout << "MinMax: " << minmax << std::endl;
-        std::cout << "Minmax time in milliseconds: "
-                  << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
-                  << " ms" << std::endl;
 
         // Check lose conditions
         if(!figureTaken && board.CheckLoseConditions(whoseTurn)) {
@@ -35,7 +25,7 @@ void Game(pamsi::Board_t& board, std::function<pamsi::Move_t(std::vector<Move_t>
                 std::cout << "BLACK WON!" << std::endl;
             else if(whoseTurn == pamsi::Team_e::black)
                 std::cout << "WHITE WON!" << std::endl;
-            getchar();
+            // getchar();
             exit(0);
         }
 
@@ -47,19 +37,19 @@ void Game(pamsi::Board_t& board, std::function<pamsi::Move_t(std::vector<Move_t>
             allMoves = std::move(lastMovedFigure->GetAttackMoves());
 
         // DEBUG
-        for(auto& move : allMoves) {
-            std::cout << move.GetSource().x << " " << move.GetSource().y << "\t"
-                      << move.GetDestination().x << " " << move.GetDestination().y << "\t"
-                      << move.GetTaken() << std::endl;
-        }
-        std::cout << std::endl;
+        // for(auto& move : allMoves) {
+        //     std::cout << move.GetSource().x << " " << move.GetSource().y << "\t"
+        //               << move.GetDestination().x << " " << move.GetDestination().y << "\t"
+        //               << move.GetTaken() << std::endl;
+        // }
+        // std::cout << std::endl;
 
         Move_t playerMove;
         // If there is no moves for player and he didn't do any move already
         if(!figureTaken && allMoves.empty()) {
             std::cout << "DRAW!" << std::endl;
             std::cout << "GAME OVER!" << std::endl;
-            getchar();
+            // getchar();
             exit(0);
         }
         // He don't have moves but already make some
@@ -70,11 +60,13 @@ void Game(pamsi::Board_t& board, std::function<pamsi::Move_t(std::vector<Move_t>
         else {
             // Get valid move from player
             if(whoseTurn == pamsi::Team_e::white)
-                playerMove = whiteMove(allMoves);
-            else if(whoseTurn == pamsi::Team_e::black)
-                playerMove = blackMove(allMoves);
+                playerMove = whiteMove(allMoves, whoseTurn, board);
+            else if(whoseTurn == pamsi::Team_e::black) {
+                playerMove = blackMove(allMoves, whoseTurn, board);
+            }
 
             // Move
+            // std::this_thread::sleep_for(std::chrono::milliseconds(100));
             board.lock();
             board.MoveFigure(playerMove);
             board.unlock();
@@ -105,16 +97,6 @@ void Game(pamsi::Board_t& board, std::function<pamsi::Move_t(std::vector<Move_t>
                 board.ChangePieceToKing(lastMovedFigure);
             }
         }
-        // Board_t backup = board;
-        // for(auto& child : algorithms::GetAllChildrenOfBoard(board, whoseTurn)) {
-        //     board.lock();
-        //     board = child;
-        //     board.unlock();
-        //     std::this_thread::sleep_for(std::chrono::milliseconds(800));
-        // }
-        // board.lock();
-        // board = backup;
-        // board.unlock();
     }
 }
 

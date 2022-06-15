@@ -6,8 +6,9 @@
 
 namespace pamsi {
 
-void Game(pamsi::Board_t& board, std::function<pamsi::Move_t(std::vector<Move_t>)> whiteMove,
-          std::function<pamsi::Move_t(std::vector<Move_t>)> blackMove);
+typedef std::function<pamsi::Move_t(std::vector<Move_t>, pamsi::Team_e, pamsi::Board_t&)> function;
+
+void Game(pamsi::Board_t& board, function whiteMove, function blackMove);
 void sfmlLoop(pamsi::Board_t& board, std::queue<sf::Vector2u>& mouseQueue, bool& reading,
               std::mutex& queueMutex);
 
