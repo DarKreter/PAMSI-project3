@@ -102,12 +102,12 @@ Move_t PlayerMouse([[maybe_unused]] const std::vector<pamsi::Move_t>& allMoves,
     return *result;
 }
 
-void GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e whoseTurn,
-                           std::vector<pamsi::Board_t>& childrens, bool figureTaken,
-                           std::shared_ptr<Figure_t> lastMovedFigure)
+std::vector<pamsi::Board_t> GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e whoseTurn,
+                                                  bool figureTaken,
+                                                  std::shared_ptr<Figure_t> lastMovedFigure)
 {
+    std::vector<pamsi::Board_t> childrens;
     // Get all possible moves for current player
-
     std::vector<Move_t> allMoves;
     if(!figureTaken)
         allMoves = std::move(father.GetAllPossibleMoves(whoseTurn, figureTaken));
@@ -118,7 +118,6 @@ void GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e whoseTurn,
 
         allMoves = std::move(trulyLastMovedFigure->GetAttackMoves());
     }
-
     for(Move_t& move : allMoves) {
         father.lock();
         Board_t temp = father;
@@ -126,13 +125,19 @@ void GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e whoseTurn,
         father.unlock();
 
         if(move.GetTaken() != nullptr) {
-            GetAllChildrenOfBoard(
-                temp, whoseTurn, childrens, true,
+            std::vector<pamsi::Board_t> secondChildrens = GetAllChildrenOfBoard(
+                temp, whoseTurn, true,
                 temp(move.GetDestination().x, move.GetDestination().y).GetFigure());
+            if(secondChildrens.empty())
+                childrens.emplace_back(temp);
+            else
+                childrens.insert(childrens.end(), secondChildrens.begin(), secondChildrens.end());
         }
         else
             childrens.emplace_back(temp);
     }
+
+    return childrens;
 }
 
 int MinMax(Board_t board, size_t depth, int alpha, int beta, Team_e whoseTurn,
@@ -143,9 +148,7 @@ int MinMax(Board_t board, size_t depth, int alpha, int beta, Team_e whoseTurn,
 
     if(maximizingPlayer == whoseTurn) {
         int max = INT_MIN;
-        std::vector<pamsi::Board_t> childrens;
-        GetAllChildrenOfBoard(board, whoseTurn, childrens);
-        std::cout << "size: " << childrens.size() << std::endl;
+        auto childrens = GetAllChildrenOfBoard(board, whoseTurn);
         for(auto& child : childrens) {
             int eval = MinMax(child, depth - 1, alpha, beta,
                               (whoseTurn == Team_e::white ? Team_e::black : Team_e::white),
@@ -155,13 +158,11 @@ int MinMax(Board_t board, size_t depth, int alpha, int beta, Team_e whoseTurn,
             if(beta <= alpha)
                 break;
         }
-        std::cout << max << std::endl;
         return max;
     }
     else {
         int min = INT_MAX;
-        std::vector<pamsi::Board_t> childrens;
-        GetAllChildrenOfBoard(board, whoseTurn, childrens);
+        auto childrens = GetAllChildrenOfBoard(board, whoseTurn);
         for(auto& child : childrens) {
             int eval = MinMax(child, depth - 1, alpha, beta,
                               (whoseTurn == Team_e::white ? Team_e::black : Team_e::white),

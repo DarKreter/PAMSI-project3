@@ -21,7 +21,7 @@ void Game(pamsi::Board_t& board, std::function<pamsi::Move_t(std::vector<Move_t>
 
     while(true) {
         auto start = std::chrono::steady_clock::now();
-        int minmax = algorithms::MinMax(board, 1, INT_MIN, INT_MAX, whoseTurn, Team_e::white);
+        int minmax = algorithms::MinMax(board, 5, INT_MIN, INT_MAX, whoseTurn, Team_e::white);
         auto end = std::chrono::steady_clock::now();
         std::cout << "MinMax: " << minmax << std::endl;
         std::cout << "Minmax time in milliseconds: "
@@ -105,6 +105,16 @@ void Game(pamsi::Board_t& board, std::function<pamsi::Move_t(std::vector<Move_t>
                 board.ChangePieceToKing(lastMovedFigure);
             }
         }
+        // Board_t backup = board;
+        // for(auto& child : algorithms::GetAllChildrenOfBoard(board, whoseTurn)) {
+        //     board.lock();
+        //     board = child;
+        //     board.unlock();
+        //     std::this_thread::sleep_for(std::chrono::milliseconds(800));
+        // }
+        // board.lock();
+        // board = backup;
+        // board.unlock();
     }
 }
 
