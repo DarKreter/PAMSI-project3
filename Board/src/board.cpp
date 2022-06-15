@@ -8,6 +8,7 @@ namespace pamsi {
 
 Board_t::Board_t(const Board_t& second)
 {
+    // In copying constructor we only need a neccessary copy of second board
     SetUpTilesCopy();
     SetUpFiguresCopy(second);
 }
@@ -46,20 +47,23 @@ void Board_t::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 void Board_t::ChangePieceToKing(std::shared_ptr<Figure_t> figure)
 {
+    // Create king with proper coord and team
     std::shared_ptr<Figure_t> temp = std::make_shared<King_t>(_figureRadius);
     temp->SetBoard(this);
     temp->SetCoordinates(figure->GetCoordinates());
     temp->SetTeam(figure->GetTeam());
     if(figure->GetTeam() == Team_e::white) {
+        // replace piece with king
         temp->SetTexture(_whiteKing);
         std::replace(std::begin(_whiteFigures), std::end(_whiteFigures), figure, temp);
     }
     else if(figure->GetTeam() == Team_e::black) {
+        // replace piece with king
         temp->SetTexture(_blackKing);
         std::replace(_blackFigures.begin(), _blackFigures.end(), figure, temp);
     }
 
-    // Move it on tiles array
+    // Replace it on tiles array
     _tiles[figure->GetCoordinates().x][figure->GetCoordinates().y].SetFigure(nullptr);
     _tiles[figure->GetCoordinates().x][figure->GetCoordinates().y].SetFigure(temp);
 }
@@ -204,16 +208,6 @@ void Board_t::SetUpFiguresGameStart()
             }
         }
     }
-    // int x = 2, y = 1;
-    // auto temp = std::make_shared<Piece_t>(_figureRadius);
-    // // configure piece
-    // temp->SetBoard(this);
-    // temp->SetTexture(_blackPiece);
-    // temp->SetCoordinates(sf::Vector2u(x, y));
-    // temp->SetTeam(Team_e::black);
-    // _blackFigures.emplace_back(temp);
-    // // add piece into tile array
-    // _tiles[x][y].SetFigure(temp);
 }
 
 void Board_t::SetUpTiles()

@@ -23,7 +23,7 @@ void Tile_t::draw(sf::RenderTarget& target, sf::RenderStates states) const
     // apply the texture
     // states.texture = &_texture;
 
-    // draw the vertex array
+    // draw the shape
     target.draw(_shape, states);
 }
 

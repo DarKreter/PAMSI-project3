@@ -11,11 +11,13 @@ namespace pamsi::algorithms {
 pamsi::Move_t Random(const std::vector<pamsi::Move_t>& allMoves, [[maybe_unused]] pamsi::Team_e a,
                      [[maybe_unused]] pamsi::Board_t& board)
 {
+    // Just random shot
     return *select_randomly(allMoves.begin(), allMoves.end());
 }
 
 pamsi::Move_t LastAvailableMove(const std::vector<pamsi::Move_t>& allMoves)
 {
+    // always last from container
     return *(std::end(allMoves) - 1);
 }
 
@@ -56,6 +58,7 @@ Move_t PlayerMouse([[maybe_unused]] const std::vector<pamsi::Move_t>& allMoves,
     reading = true;
     sf::Vector2u source, dest;
     std::vector<Move_t>::const_iterator result;
+    // lambda expression that gets pressed tile (tries until it happen)
     auto GetElFromQueue = [&]() {
         while(true) {
             queueMutex.lock();
@@ -64,8 +67,9 @@ Move_t PlayerMouse([[maybe_unused]] const std::vector<pamsi::Move_t>& allMoves,
             queueMutex.unlock();
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
-
+        // get new pressed tile
         auto pressedTile = mouseQueue.back();
+        // remove it from queue
         mouseQueue.pop();
         // std::cout << pressedTile.x << ", " << pressedTile.y << std::endl;
 
@@ -75,9 +79,10 @@ Move_t PlayerMouse([[maybe_unused]] const std::vector<pamsi::Move_t>& allMoves,
 
     Move_t myMove(source, dest);
     do {
+        // Get two tiles
         source = GetElFromQueue();
         dest = GetElFromQueue();
-
+        // Set them to source and destination
         myMove.SetSource(source);
         myMove.SetDestination(dest);
         // Check if it's valid
@@ -106,42 +111,48 @@ GetAllChildrenOfBoard(pamsi::Board_t& father, Team_e whoseTurn, Move_t firstMove
     std::vector<std::pair<pamsi::Board_t, pamsi::Move_t>> childrens;
     // Get all possible moves for current player
     std::vector<Move_t> allMoves;
+    // if figure wasnt taken get all possible moves for board and team
     if(!figureTaken)
         allMoves = std::move(father.GetAllPossibleMoves(whoseTurn, figureTaken));
     else {
+        // get lastMovedFigure coord and get this figure address
         auto trulyLastMovedFigure =
             father(lastMovedFigure->GetCoordinates().x, lastMovedFigure->GetCoordinates().y)
                 .GetFigure();
-
+        // Check attack position for it
         allMoves = std::move(trulyLastMovedFigure->GetAttackMoves());
     }
+    // Go through all moves
     for(Move_t& move : allMoves) {
         father.lock();
-        Board_t temp = father;
+        Board_t temp = father; // copy board
         temp.MoveFigure(move);
         father.unlock();
 
-        if(move.GetTaken() != nullptr) {
-
+        if(move.GetTaken() != nullptr) { // if it was strike
+            // Get grandchildrens with proper parameters
             std::vector<std::pair<pamsi::Board_t, pamsi::Move_t>> secondChildrens =
                 GetAllChildrenOfBoard(
                     temp, whoseTurn,
                     (firstMoveInSequence.GetSource().x == INT_MAX ? move : firstMoveInSequence),
                     true, temp(move.GetDestination().x, move.GetDestination().y).GetFigure());
-            if(secondChildrens.empty()) {
+            if(secondChildrens.empty()) { // if empty
                 if(firstMoveInSequence.GetSource().x == INT_MAX)
-                    childrens.emplace_back(std::make_pair(temp, move));
+                    childrens.emplace_back(std::make_pair(temp, move)); // add last move
                 else
                     childrens.emplace_back(std::make_pair(temp, firstMoveInSequence));
             }
-            else
-                childrens.insert(childrens.end(), secondChildrens.begin(), secondChildrens.end());
+            else // if not empty
+                childrens.insert(childrens.end(), secondChildrens.begin(),
+                                 secondChildrens.end()); // append grandchildrens
         }
-        else {
+        else { // if it was normal move
             if(firstMoveInSequence.GetSource().x == INT_MAX)
-                childrens.emplace_back(std::make_pair(temp, move));
+                childrens.emplace_back(
+                    std::make_pair(temp, move)); // insert this move into children container
             else
-                childrens.emplace_back(std::make_pair(temp, firstMoveInSequence));
+                childrens.emplace_back(std::make_pair(
+                    temp, firstMoveInSequence)); // if its last in sequence them add the first one
         }
     }
 
@@ -152,39 +163,45 @@ std::pair<int, Move_t*> MinMax(Board_t board, size_t depth, int alpha, int beta,
                                Team_e maximizingPlayer, int (*RateBoard)(const Board_t&, Team_e),
                                bool firstOne)
 {
+    // if we reach desired depth or its end of game just rate the board
     if(depth == 0 || board.CheckLoseConditions(whoseTurn))
         return {RateBoard(board, maximizingPlayer), nullptr};
 
+    // if its turn player we maximize
     if(maximizingPlayer == whoseTurn) {
         int max = INT_MIN;
         size_t count = 0;
         std::vector<int> toChoose;
-        auto childrens = GetAllChildrenOfBoard(board, whoseTurn, Move_t());
+        auto childrens = GetAllChildrenOfBoard(board, whoseTurn, Move_t()); // Get all childerns
+        // go through all of them
         for(auto& [child, childMove] : childrens) {
+            // recursion with minmax
             int eval = MinMax(child, depth - 1, alpha, beta,
                               (whoseTurn == Team_e::white ? Team_e::black : Team_e::white),
                               maximizingPlayer, RateBoard, false)
                            .first;
-            if(eval > max) {
-                toChoose.clear();
-                max = eval;
+            if(eval > max) {      // if its bigger
+                toChoose.clear(); // clear current moves
+                max = eval;       // get new max value
                 toChoose.emplace_back(count);
             }
-            else if(eval == max)
-                toChoose.emplace_back(count);
+            else if(eval == max)              // if equal to current max
+                toChoose.emplace_back(count); // append this move
             max = std::max(max, eval);
             alpha = std::max(alpha, eval);
             count++;
-            if(beta <= alpha)
+            if(beta <= alpha) // alpha beta pruning
                 break;
         }
         if(firstOne) {
+            // Chose random move from all with max value
             int which = *select_randomly(toChoose.begin(), toChoose.end());
             return {max, new Move_t(childrens[which].second)};
         }
 
         return {max, nullptr};
     }
+    // same with min
     else {
         int min = INT_MAX;
         size_t count = 0;
@@ -220,6 +237,7 @@ std::pair<int, Move_t*> MinMax(Board_t board, size_t depth, int alpha, int beta,
 namespace BR {
 int CountFigures(const Board_t& board, Team_e who)
 {
+    // just calculate difference
     if(who == Team_e::white)
         return board.GetWhiteFigures().size() - board.GetBlackFigures().size();
     else
@@ -229,7 +247,7 @@ int CountFigures(const Board_t& board, Team_e who)
 int CountFiguresWithKing(const Board_t& board, Team_e who)
 {
     int whiteSum = 0, blackSum = 0;
-
+    // calculate difference, but with counting king as 4 pieces
     for(auto& figure : board.GetWhiteFigures())
         switch(figure->GetWhoAmI()) {
         case Figure_t::WhoAmI::Piece:
@@ -262,6 +280,7 @@ int CountFiguresWithKing(const Board_t& board, Team_e who)
 
 int ValuePosition(const Board_t& board, Team_e who)
 {
+    // Same as `CountFiguresWithKing`, but add value to pieces if they are closer to became king
     int whiteSum = 0, blackSum = 0;
     int temp;
     for(auto& figure : board.GetWhiteFigures())

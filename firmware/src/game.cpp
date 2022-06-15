@@ -12,8 +12,8 @@ namespace pamsi {
 void Game(pamsi::Board_t& board, function whiteMove, function blackMove)
 {
     // white always starts
-    static std::shared_ptr<Figure_t> lastMovedFigure = nullptr;
     pamsi::Team_e whoseTurn = pamsi::Team_e::white;
+    std::shared_ptr<Figure_t> lastMovedFigure = nullptr;
     bool figureTaken = false;
 
     while(true) {
@@ -25,11 +25,12 @@ void Game(pamsi::Board_t& board, function whiteMove, function blackMove)
                 std::cout << "BLACK WON!" << std::endl;
             else if(whoseTurn == pamsi::Team_e::black)
                 std::cout << "WHITE WON!" << std::endl;
-            // getchar();
+            getchar();
             exit(0);
         }
 
-        // Get all possible moves for current player
+        // Get all possible moves for current player (if last move was strike, we check only strikes
+        // for lastMovedFigure)
         std::vector<Move_t> allMoves;
         if(!figureTaken)
             allMoves = std::move(board.GetAllPossibleMoves(whoseTurn, figureTaken));
@@ -58,20 +59,17 @@ void Game(pamsi::Board_t& board, function whiteMove, function blackMove)
         }
         // He has move
         else {
-            // Get valid move from player
+            // Get valid move from proper function
             if(whoseTurn == pamsi::Team_e::white)
                 playerMove = whiteMove(allMoves, whoseTurn, board);
-            else if(whoseTurn == pamsi::Team_e::black) {
+            else if(whoseTurn == pamsi::Team_e::black)
                 playerMove = blackMove(allMoves, whoseTurn, board);
-            }
 
             // Move
-            if(whoseTurn == Team_e::black)
-                std::this_thread::sleep_for(std::chrono::milliseconds(700));
             board.lock();
             board.MoveFigure(playerMove);
             board.unlock();
-
+            // log last moved figure
             lastMovedFigure =
                 board(playerMove.GetDestination().x, playerMove.GetDestination().y).GetFigure();
 
@@ -127,15 +125,19 @@ void sfmlLoop(pamsi::Board_t& board, std::queue<sf::Vector2u>& mouseQueue, bool&
             // "close requested" event: we close the window
             if(event.type == sf::Event::Closed)
                 window.close();
+            // if mouse was pressed
             else if(event.type == sf::Event::MouseButtonPressed) {
+                // and we have enabled reading flag
                 if(event.mouseButton.button == sf::Mouse::Left && reading) {
+                    // get pressed tile
                     auto tile = GetPressedTileCoord(
                         sf::Vector2u(event.mouseButton.x, event.mouseButton.y), window.getSize());
 
                     queueMutex.lock();
+                    // if queue is full, remove last element
                     if(mouseQueue.size() == 10)
                         mouseQueue.pop();
-
+                    // Add pressed tile to queue
                     mouseQueue.push(tile);
                     queueMutex.unlock();
                 }
@@ -145,6 +147,7 @@ void sfmlLoop(pamsi::Board_t& board, std::queue<sf::Vector2u>& mouseQueue, bool&
         // clear the window with black color
         window.clear(sf::Color::White);
 
+        // draw board
         board.lock();
         window.draw(board);
         board.unlock();

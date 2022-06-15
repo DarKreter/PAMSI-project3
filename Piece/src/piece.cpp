@@ -1,13 +1,13 @@
-#include "board.hpp"
 #include "piece.hpp"
+#include "board.hpp"
 #include <iostream>
-
 
 namespace pamsi {
 
 std::vector<pamsi::Move_t> Piece_t::GetNormalMoves()
 {
     // Get available direction for specified team
+    // Piece can only go forward on a slant
     std::vector<sf::Vector2i> options;
     switch(_team) {
     case Team_e::white:
